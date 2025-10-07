@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Library RS')</title>
+    <title>@yield('title', 'Assets RS')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/x-icon" href="images/logo.png">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -29,7 +29,7 @@
                     <div class="bg-white rounded-xl border border-green-200 shadow-sm p-2 flex-shrink-0">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto object-contain">
                     </div>
-                    <h1 x-show="!sidebarCollapsed" class="text-xl font-bold text-white tracking-wide truncate">Library RS</h1>
+                    <h1 x-show="!sidebarCollapsed" class="text-xl font-bold text-white tracking-wide truncate">Assets RS</h1>
                 </div>
                 
             </div>
@@ -76,6 +76,15 @@
                     </li>
                     @endif
 
+                    @if(auth()->user()->hasPermission('manage_fixed_assets'))
+                    <li>
+                        <a href="{{ route('fixed-assets.index') }}" class="flex items-center px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('fixed-assets.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Fixed Assets">
+                            <i class="fas fa-building w-5" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+                            <span x-show="!sidebarCollapsed">Fixed Assets</span>
+                        </a>
+                    </li>
+                    @endif
+
                 </ul>
 
                 <!-- User Profile Section -->
@@ -108,7 +117,7 @@
                         </button>
                         <div>
                             <h2 class="text-xl font-semibold text-gray-800">@yield('title', 'Dashboard')</h2>
-                            <p class="text-sm text-gray-500">Library Management System</p>
+                            <p class="text-sm text-gray-500">Assets Management System</p>
                         </div>
                     </div>
                     

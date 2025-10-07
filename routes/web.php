@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\FixedAssetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +50,11 @@ Route::middleware('auth')->group(function () {
     // Permission Management routes
     Route::middleware('permission:manage_permissions')->group(function () {
         Route::resource('permissions', PermissionController::class);
+    });
+
+    // Fixed Assets Management routes
+    Route::middleware('permission:manage_fixed_assets')->group(function () {
+        Route::resource('fixed-assets', FixedAssetController::class);
     });
 
 });

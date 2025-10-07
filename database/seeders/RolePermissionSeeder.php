@@ -16,42 +16,53 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'manage_permissions', 'display_name' => 'Kelola Permissions', 'description' => 'Mengelola permissions'],
             ['name' => 'view_dashboard', 'display_name' => 'Lihat Dashboard', 'description' => 'Melihat halaman dashboard'],
             ['name' => 'manage_users', 'display_name' => 'Kelola Users', 'description' => 'Mengelola pengguna'],
+            ['name' => 'manage_fixed_assets', 'display_name' => 'Kelola Fixed Assets', 'description' => 'Mengelola aset tetap'],
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create($permission);
+            Permission::firstOrCreate(
+                ['name' => $permission['name']],
+                $permission
+            );
         }
 
         // Create Roles
-        $adminRole = Role::create([
-            'name' => 'admin',
-            'display_name' => 'Administrator',
-            'description' => 'Role dengan akses penuh ke sistem'
-        ]);
+        $adminRole = Role::firstOrCreate(
+            ['name' => 'admin'],
+            [
+                'display_name' => 'Administrator',
+                'description' => 'Role dengan akses penuh ke sistem'
+            ]
+        );
 
-        $librarianRole = Role::create([
-            'name' => 'librarian',
-            'display_name' => 'Pustakawan',
-            'description' => 'Role untuk mengelola perpustakaan'
-        ]);
+        $librarianRole = Role::firstOrCreate(
+            ['name' => 'librarian'],
+            [
+                'display_name' => 'Pustakawan',
+                'description' => 'Role untuk mengelola perpustakaan'
+            ]
+        );
 
-        $userRole = Role::create([
-            'name' => 'user',
-            'display_name' => 'Pengguna',
-            'description' => 'Role untuk pengguna umum'
-        ]);
+        $userRole = Role::firstOrCreate(
+            ['name' => 'user'],
+            [
+                'display_name' => 'Pengguna',
+                'description' => 'Role untuk pengguna umum'
+            ]
+        );
 
         // Assign permissions to roles
-        $adminRole->permissions()->attach(Permission::all()); // Admin gets all permissions
+        $adminRole->permissions()->sync(Permission::all()); // Admin gets all permissions
         
-        $librarianRole->permissions()->attach(
+        $librarianRole->permissions()->sync(
             Permission::whereIn('name', [
                 'view_dashboard',
-                'manage_users'
+                'manage_users',
+                'manage_fixed_assets'
             ])->get()
         );
         
-        $userRole->permissions()->attach(
+        $userRole->permissions()->sync(
             Permission::whereIn('name', [
                 'view_dashboard'
             ])->get()
