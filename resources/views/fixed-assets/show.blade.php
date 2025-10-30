@@ -46,15 +46,11 @@
                     </div>
                 </div>
 
-                <div class="flex items-start py-1.5 border-b border-gray-100">
-                    <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0 pt-1">Nama Asset</dt>
-                    <dd class="text-sm text-gray-900 font-medium">{{ $fixedAsset->nama_fixed_asset }}</dd>
-                </div>
-
+                <!-- Nama Asset + Lokasi (same row to utilize space) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div class="flex items-center py-1.5 border-b border-gray-100">
-                        <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Tipe Asset</dt>
-                        <dd class="text-sm text-gray-900">{{ optional($fixedAsset->typeRef)->name ?? '-' }}</dd>
+                    <div class="flex items-start py-1.5 border-b border-gray-100">
+                        <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0 pt-1">Nama Asset</dt>
+                        <dd class="text-sm text-gray-900 font-medium">{{ $fixedAsset->nama_fixed_asset }}</dd>
                     </div>
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Lokasi</dt>
@@ -62,7 +58,12 @@
                     </div>
                 </div>
 
+                <!-- Tipe Asset + Status -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div class="flex items-center py-1.5 border-b border-gray-100">
+                        <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Tipe Asset</dt>
+                        <dd class="text-sm text-gray-900">{{ optional($fixedAsset->typeRef)->name ?? '-' }}</dd>
+                    </div>
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Status</dt>
                         <dd class="text-sm">
@@ -76,6 +77,10 @@
                             </span>
                         </dd>
                     </div>
+                </div>
+
+                <!-- Kondisi -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Kondisi</dt>
                         <dd class="text-sm">

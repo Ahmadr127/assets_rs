@@ -58,7 +58,7 @@
                 </div>
 
                 <!-- Nama Fixed Asset -->
-                <div class="md:col-span-2">
+                <div>
                     <label for="nama_fixed_asset" class="block text-xs font-medium text-gray-700 mb-1">
                         Nama Fixed Asset <span class="text-red-500">*</span>
                     </label>
