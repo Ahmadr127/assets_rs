@@ -58,7 +58,7 @@ class PermissionController extends Controller
             'description' => $request->description
         ]);
 
-        return redirect()->route('permissions.index')->with('success', 'Permission berhasil dibuat!');
+        return redirect()->route('permissions.index')->with('success', 'Permission berhasil dibuat');
     }
 
     public function edit(Permission $permission)
@@ -84,12 +84,12 @@ class PermissionController extends Controller
             'description' => $request->description
         ]);
 
-        return redirect()->route('permissions.index')->with('success', 'Permission berhasil diperbarui!');
+        return redirect()->route('permissions.index')->with('success', 'Permission berhasil diperbarui');
     }
 
     public function destroy(Permission $permission)
     {
         $permission->delete();
-        return redirect()->route('permissions.index')->with('success', 'Permission berhasil dihapus!');
+        return redirect()->route('permissions.index')->with('success', 'Permission berhasil dihapus');
     }
 }

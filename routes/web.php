@@ -7,6 +7,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\FixedAssetController;
+use App\Http\Controllers\Masters\LocationController;
+use App\Http\Controllers\Masters\AssetStatusController;
+use App\Http\Controllers\Masters\AssetConditionController;
+use App\Http\Controllers\Masters\VendorController;
+use App\Http\Controllers\Masters\BrandController;
+use App\Http\Controllers\Masters\AssetTypeController;
+use App\Http\Controllers\QRCodeController;
+use App\Http\Controllers\DinamicLookupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +63,31 @@ Route::middleware('auth')->group(function () {
     // Fixed Assets Management routes
     Route::middleware('permission:manage_fixed_assets')->group(function () {
         Route::resource('fixed-assets', FixedAssetController::class);
+
+        // Masters (Lokasi, Status, Kondisi, Vendor, Brand, Tipe)
+        Route::prefix('masters')->as('masters.')->group(function () {
+            Route::resource('locations', LocationController::class)->except(['show']);
+            Route::resource('statuses', AssetStatusController::class)->except(['show']);
+            Route::resource('conditions', AssetConditionController::class)->except(['show']);
+            Route::resource('vendors', VendorController::class)->except(['show']);
+            Route::resource('brands', BrandController::class)->except(['show']);
+            Route::resource('types', AssetTypeController::class)->except(['show']);
+
+            // JSON lookup endpoints (search and create)
+            Route::get('lookup/{entity}', [DinamicLookupController::class, 'search'])->name('lookup.search');
+            Route::post('lookup/{entity}', [DinamicLookupController::class, 'store'])->name('lookup.store');
+        });
+    });
+
+    // QR Code routes
+    Route::prefix('qr')->name('qr.')->group(function () {
+        // General QR code generation
+        Route::get('generate', [QRCodeController::class, 'generate'])->name('generate');
+        
+        // Fixed Asset specific QR codes
+        Route::get('asset/{fixedAsset}', [QRCodeController::class, 'fixedAsset'])->name('asset');
+        Route::get('asset/{fixedAsset}/print', [QRCodeController::class, 'printableAsset'])->name('asset.print');
+        Route::get('asset/{fixedAsset}/download', [QRCodeController::class, 'download'])->name('asset.download');
     });
 
 });

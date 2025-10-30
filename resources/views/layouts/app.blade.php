@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Assets RS')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/x-icon" href="images/logo.png">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -83,6 +84,49 @@
                             <span x-show="!sidebarCollapsed">Fixed Assets</span>
                         </a>
                     </li>
+                    <li>
+                        <div class="px-4 mt-4 mb-2">
+                            <h3 x-show="!sidebarCollapsed" class="text-xs font-semibold text-green-200 uppercase tracking-wider">Masters</h3>
+                        </div>
+                        <ul class="space-y-1">
+                            <li>
+                                <a href="{{ route('masters.locations.index') }}" class="flex items-center px-4 py-2 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('masters.locations.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Lokasi">
+                                    <i class="fas fa-location-dot w-5" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+                                    <span x-show="!sidebarCollapsed">Lokasi</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('masters.statuses.index') }}" class="flex items-center px-4 py-2 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('masters.statuses.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Status">
+                                    <i class="fas fa-toggle-on w-5" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+                                    <span x-show="!sidebarCollapsed">Status</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('masters.conditions.index') }}" class="flex items-center px-4 py-2 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('masters.conditions.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Kondisi">
+                                    <i class="fas fa-stethoscope w-5" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+                                    <span x-show="!sidebarCollapsed">Kondisi</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('masters.vendors.index') }}" class="flex items-center px-4 py-2 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('masters.vendors.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Vendor">
+                                    <i class="fas fa-truck w-5" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+                                    <span x-show="!sidebarCollapsed">Vendor</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('masters.brands.index') }}" class="flex items-center px-4 py-2 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('masters.brands.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Brand">
+                                    <i class="fas fa-tags w-5" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+                                    <span x-show="!sidebarCollapsed">Brand</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('masters.types.index') }}" class="flex items-center px-4 py-2 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('masters.types.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Tipe Asset">
+                                    <i class="fas fa-shapes w-5" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+                                    <span x-show="!sidebarCollapsed">Tipe Asset</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     @endif
 
                 </ul>
@@ -137,24 +181,6 @@
 
             <!-- Page Content -->
             <main class="flex-1 p-6 bg-gray-50">
-                @if(session('success'))
-                    <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                        <div class="flex items-center">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            {{ session('success') }}
-                        </div>
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                        <div class="flex items-center">
-                            <i class="fas fa-exclamation-circle mr-2"></i>
-                            {{ session('error') }}
-                        </div>
-                    </div>
-                @endif
-
                 @yield('content')
             </main>
         </div>
@@ -163,5 +189,10 @@
         <div x-show="sidebarOpen" @click="sidebarOpen = false" 
              class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"></div>
     </div>
+
+    <!-- Toast Container -->
+    <x-toast-container />
+
+    @stack('scripts')
 </body>
 </html>

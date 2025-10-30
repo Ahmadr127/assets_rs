@@ -66,7 +66,7 @@ class UserController extends Controller
             'role_id' => $request->role_id
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User berhasil dibuat!');
+        return redirect()->route('users.index')->with('success', 'User berhasil dibuat');
     }
 
     public function edit(User $user)
@@ -102,17 +102,17 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui!');
+        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui');
     }
 
     public function destroy(User $user)
     {
         // Mencegah user menghapus dirinya sendiri
         if ($user->id === auth()->id()) {
-            return redirect()->route('users.index')->with('error', 'Tidak dapat menghapus akun sendiri!');
+            return redirect()->route('users.index')->with('error', 'Tidak dapat menghapus akun sendiri');
         }
 
         $user->delete();
-        return redirect()->route('users.index')->with('success', 'User berhasil dihapus!');
+        return redirect()->route('users.index')->with('success', 'User berhasil dihapus');
     }
 }

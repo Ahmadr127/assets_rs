@@ -65,7 +65,7 @@ class RoleController extends Controller
             $role->permissions()->attach($request->permissions);
         }
 
-        return redirect()->route('roles.index')->with('success', 'Role berhasil dibuat!');
+        return redirect()->route('roles.index')->with('success', 'Role berhasil dibuat');
     }
 
     public function edit(Role $role)
@@ -95,12 +95,12 @@ class RoleController extends Controller
 
         $role->permissions()->sync($request->permissions ?? []);
 
-        return redirect()->route('roles.index')->with('success', 'Role berhasil diperbarui!');
+        return redirect()->route('roles.index')->with('success', 'Role berhasil diperbarui');
     }
 
     public function destroy(Role $role)
     {
         $role->delete();
-        return redirect()->route('roles.index')->with('success', 'Role berhasil dihapus!');
+        return redirect()->route('roles.index')->with('success', 'Role berhasil dihapus');
     }
 }
