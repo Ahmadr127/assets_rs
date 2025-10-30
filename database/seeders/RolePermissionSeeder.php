@@ -35,14 +35,6 @@ class RolePermissionSeeder extends Seeder
             ]
         );
 
-        $librarianRole = Role::firstOrCreate(
-            ['name' => 'librarian'],
-            [
-                'display_name' => 'Pustakawan',
-                'description' => 'Role untuk mengelola perpustakaan'
-            ]
-        );
-
         $userRole = Role::firstOrCreate(
             ['name' => 'user'],
             [
@@ -53,14 +45,6 @@ class RolePermissionSeeder extends Seeder
 
         // Assign permissions to roles
         $adminRole->permissions()->sync(Permission::all()); // Admin gets all permissions
-        
-        $librarianRole->permissions()->sync(
-            Permission::whereIn('name', [
-                'view_dashboard',
-                'manage_users',
-                'manage_fixed_assets'
-            ])->get()
-        );
         
         $userRole->permissions()->sync(
             Permission::whereIn('name', [

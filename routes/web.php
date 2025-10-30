@@ -79,15 +79,21 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    // QR Code routes
-    Route::prefix('qr')->name('qr.')->group(function () {
-        // General QR code generation
-        Route::get('generate', [QRCodeController::class, 'generate'])->name('generate');
-        
-        // Fixed Asset specific QR codes
-        Route::get('asset/{fixedAsset}', [QRCodeController::class, 'fixedAsset'])->name('asset');
-        Route::get('asset/{fixedAsset}/print', [QRCodeController::class, 'printableAsset'])->name('asset.print');
-        Route::get('asset/{fixedAsset}/download', [QRCodeController::class, 'download'])->name('asset.download');
-    });
+    
 
+});
+
+// Public routes (no auth required) - placed at the end to avoid conflicts
+// Public view for asset (QR code scanning) - separate from admin routes
+Route::get('/asset/{fixedAsset}', [FixedAssetController::class, 'showPublic'])->name('asset.public.show');
+
+// QR Code routes (public)
+Route::prefix('qr')->name('qr.')->group(function () {
+    // General QR code generation
+    Route::get('generate', [QRCodeController::class, 'generate'])->name('generate');
+    
+    // Fixed Asset specific QR codes
+    Route::get('asset/{fixedAsset}', [QRCodeController::class, 'fixedAsset'])->name('asset');
+    Route::get('asset/{fixedAsset}/print', [QRCodeController::class, 'printableAsset'])->name('asset.print');
+    Route::get('asset/{fixedAsset}/download', [QRCodeController::class, 'download'])->name('asset.download');
 });

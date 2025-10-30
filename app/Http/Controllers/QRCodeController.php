@@ -90,10 +90,10 @@ class QRCodeController extends Controller
             $format = $request->input('format', 'png');
             $margin = $request->input('margin', 2);
 
-            // Generate the URL for the asset
-            $url = route('fixed-assets.show', $fixedAsset);
+            // Generate the URL for the asset (public route for QR scanning)
+            $url = route('asset.public.show', $fixedAsset);
             
-            // Generate QR code without caching for now (to debug)
+            // Generate QR code
             $qrCode = QrCode::format($format)
                 ->size($size)
                 ->margin($margin)
@@ -101,12 +101,16 @@ class QRCodeController extends Controller
                 ->generate($url);
 
             $contentType = $format === 'svg' ? 'image/svg+xml' : 'image/png';
-            $filename = 'asset_' . $fixedAsset->kode . '_qrcode.' . $format;
+            
+            // Sanitize filename
+            $safeKode = preg_replace('/[^a-zA-Z0-9_-]/', '_', $fixedAsset->kode);
+            $filename = 'asset_' . $safeKode . '_qrcode.' . $format;
 
-            return response($qrCode)
-                ->header('Content-Type', $contentType)
-                ->header('Cache-Control', 'public, max-age=3600')
-                ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
+            return response()->make($qrCode, 200, [
+                'Content-Type' => $contentType,
+                'Cache-Control' => 'public, max-age=3600',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"'
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Fixed Asset QR Code generation failed', [
@@ -135,10 +139,10 @@ class QRCodeController extends Controller
             'size' => 'nullable|integer|min:200|max:400'
         ]);
 
-        $size = $request->input('size', 300);
+        $size = $request->input('size', 200);
         
         try {
-            $url = route('fixed-assets.show', $fixedAsset);
+            $url = route('asset.public.show', $fixedAsset);
             $qrCodeSvg = QrCode::format('svg')
                 ->size($size)
                 ->margin(2)
@@ -173,7 +177,7 @@ class QRCodeController extends Controller
      *
      * @param FixedAsset $fixedAsset
      * @param Request $request
-     * @return Response
+     * @return Response|\Illuminate\Http\JsonResponse
      */
     public function download(FixedAsset $fixedAsset, Request $request)
     {
@@ -183,33 +187,45 @@ class QRCodeController extends Controller
         ]);
 
         $size = $request->input('size', 400);
-        $format = $request->input('format', 'png');
+        $format = $request->input('format', 'svg'); // Default to SVG (no imagick needed)
 
         try {
-            $url = route('fixed-assets.show', $fixedAsset);
+            $url = route('asset.public.show', $fixedAsset);
             
-            $qrCode = QrCode::format($format)
+            // Always use SVG format as it doesn't require imagick extension
+            // SVG is also better quality and smaller file size
+            $qrCode = QrCode::format('svg')
                 ->size($size)
                 ->margin(2)
-                ->errorCorrection('H') // High error correction for downloads
+                ->errorCorrection('H')
                 ->generate($url);
+            
+            $contentType = 'image/svg+xml';
+            $actualFormat = 'svg';
 
-            $filename = 'qrcode_' . $fixedAsset->kode . '_' . now()->format('Ymd_His') . '.' . $format;
-            $contentType = $format === 'svg' ? 'image/svg+xml' : 'image/png';
+            // Sanitize filename
+            $safeKode = preg_replace('/[^a-zA-Z0-9_-]/', '_', $fixedAsset->kode);
+            $filename = 'qrcode_' . $safeKode . '_' . now()->format('Ymd_His') . '.' . $actualFormat;
 
-            return response($qrCode)
-                ->header('Content-Type', $contentType)
-                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
-                ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
+            return response()->make($qrCode, 200, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Length' => strlen($qrCode),
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0'
+            ]);
 
         } catch (\Exception $e) {
             Log::error('QR Code download failed', [
                 'asset_id' => $fixedAsset->id,
-                'error' => $e->getMessage()
+                'asset_code' => $fixedAsset->kode ?? 'unknown',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
-                'error' => 'Failed to download QR code'
+                'error' => 'Failed to download QR code: ' . $e->getMessage()
             ], 500);
         }
     }

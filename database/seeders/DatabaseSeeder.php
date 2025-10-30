@@ -13,9 +13,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Call RolePermissionSeeder first
+        // Call seeders in order
         $this->call([
             RolePermissionSeeder::class,
+            MenuPermissionSeeder::class,
         ]);
 
         // Create admin user

@@ -168,7 +168,7 @@
     <!-- Pagination -->
     @if($fixedAssets->hasPages())
     <div class="mt-3">
-        <x-dynamic-pagination :paginator="$fixedAssets" />
+        {{ $fixedAssets->links() }}
     </div>
     @endif
 </div>

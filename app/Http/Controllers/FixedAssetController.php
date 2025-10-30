@@ -162,12 +162,21 @@ class FixedAssetController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource (Admin/Auth view with layout).
      */
     public function show(FixedAsset $fixedAsset)
     {
         $fixedAsset->load(['location','statusRef','conditionRef','vendorRef','brandRef','typeRef']);
         return view('fixed-assets.show', compact('fixedAsset'));
+    }
+
+    /**
+     * Display the specified resource for public (QR scanning - no layout).
+     */
+    public function showPublic(FixedAsset $fixedAsset)
+    {
+        $fixedAsset->load(['location','statusRef','conditionRef','vendorRef','brandRef','typeRef']);
+        return view('fixed-assets.show-public', compact('fixedAsset'));
     }
 
     /**

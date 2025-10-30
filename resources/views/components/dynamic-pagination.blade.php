@@ -57,11 +57,13 @@
                 @endif
 
                 {{-- Pagination Elements --}}
-                @foreach ($paginator->getUrlRange(1, $paginator->lastPage()) as $page => $url)
+                @foreach ($paginator->links()->elements[0] as $page => $url)
                     @if ($page == $paginator->currentPage())
                         <span aria-current="page">
                             <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-white bg-indigo-600 border border-indigo-600 cursor-default leading-5">{{ $page }}</span>
                         </span>
+                    @elseif (is_string($url))
+                        <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 cursor-default leading-5">...</span>
                     @else
                         <a href="{{ $url }}" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150" aria-label="Go to page {{ $page }}">{{ $page }}</a>
                     @endif
