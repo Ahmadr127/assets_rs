@@ -183,8 +183,18 @@ class ExcelImportService
         }
         
         // Numeric fields
-        if (in_array($field, ['taksiran_umur', 'nilai_awal'])) {
-            return is_numeric($value) ? $value : null;
+        if (in_array($field, ['taksiran_umur'])) {
+            return is_numeric($value) ? abs((int)$value) : null;
+        }
+        
+        // Nilai awal - handle negative values
+        if ($field === 'nilai_awal') {
+            if (!is_numeric($value)) {
+                return null;
+            }
+            // Convert negative to positive (absolute value)
+            $numericValue = floatval($value);
+            return abs($numericValue);
         }
         
         // Boolean fields
@@ -262,77 +272,89 @@ class ExcelImportService
         $updatedCount = 0;
         $results = [];
         
-        DB::beginTransaction();
-        
-        try {
-            foreach ($validData as $item) {
-                try {
-                    $mappedData = $item['mapped_data'];
-                    
-                    // Auto-generate kode if not provided
-                    if (empty($mappedData['kode'])) {
-                        $mappedData['kode'] = $this->generateUniqueKode();
-                    }
-                    
-                    // Resolve foreign keys
-                    $resolvedData = $this->filterService->resolveForeignKeys($mappedData);
-                    
-                    if ($action === 'update' && isset($item['existing_record_id'])) {
-                        // Update existing record
-                        $asset = FixedAsset::find($item['existing_record_id']);
-                        if ($asset) {
-                            $asset->update($resolvedData);
-                            $updatedCount++;
-                            $status = 'updated';
-                        } else {
-                            throw new Exception("Record not found");
-                        }
+        foreach ($validData as $item) {
+            // Use individual transaction for each row to prevent cascading failures
+            DB::beginTransaction();
+            
+            try {
+                $mappedData = $item['mapped_data'];
+                
+                // Auto-generate kode if not provided
+                if (empty($mappedData['kode'])) {
+                    $mappedData['kode'] = $this->generateUniqueKode();
+                }
+                
+                // Resolve foreign keys and set defaults
+                $resolvedData = $this->filterService->resolveForeignKeys($mappedData);
+                
+                if ($action === 'update' && isset($item['existing_record_id'])) {
+                    // Update existing record
+                    $asset = FixedAsset::find($item['existing_record_id']);
+                    if ($asset) {
+                        $asset->update($resolvedData);
+                        $updatedCount++;
+                        $status = 'updated';
                     } else {
-                        // Create new record
-                        $asset = FixedAsset::create($resolvedData);
-                        $successCount++;
-                        $status = 'imported';
+                        throw new Exception("Record not found");
                     }
-                    
-                    // Log success
+                } else {
+                    // Create new record
+                    $asset = FixedAsset::create($resolvedData);
+                    $successCount++;
+                    $status = 'imported';
+                }
+                
+                // Log success
+                ImportLog::create([
+                    'import_batch_id' => $batch->id,
+                    'row_index' => $item['row_index'],
+                    'row_data' => $item['row_data'],
+                    'mapped_data' => $resolvedData,
+                    'status' => $status,
+                    'processed_at' => now(),
+                ]);
+                
+                DB::commit();
+                
+                $results[] = [
+                    'row_index' => $item['row_index'],
+                    'status' => 'success',
+                    'id' => $asset->id,
+                ];
+                
+            } catch (Exception $e) {
+                DB::rollBack();
+                $failedCount++;
+                
+                // Log error in separate transaction
+                try {
+                    DB::beginTransaction();
                     ImportLog::create([
                         'import_batch_id' => $batch->id,
                         'row_index' => $item['row_index'],
                         'row_data' => $item['row_data'],
-                        'mapped_data' => $resolvedData,
-                        'status' => $status,
-                        'processed_at' => now(),
-                    ]);
-                    
-                    $results[] = [
-                        'row_index' => $item['row_index'],
-                        'status' => 'success',
-                        'id' => $asset->id,
-                    ];
-                    
-                } catch (Exception $e) {
-                    $failedCount++;
-                    
-                    // Log error
-                    ImportLog::create([
-                        'import_batch_id' => $batch->id,
-                        'row_index' => $item['row_index'],
-                        'row_data' => $item['row_data'],
-                        'mapped_data' => $item['mapped_data'],
+                        'mapped_data' => $item['mapped_data'] ?? [],
                         'status' => 'error',
                         'errors' => ['message' => $e->getMessage()],
                         'processed_at' => now(),
                     ]);
-                    
-                    $results[] = [
-                        'row_index' => $item['row_index'],
-                        'status' => 'failed',
-                        'error' => $e->getMessage(),
-                    ];
+                    DB::commit();
+                } catch (Exception $logError) {
+                    DB::rollBack();
+                    // If logging fails, continue with next record
                 }
+                
+                $results[] = [
+                    'row_index' => $item['row_index'],
+                    'status' => 'failed',
+                    'error' => $e->getMessage(),
+                ];
             }
-            
-            // Update batch statistics
+        }
+        
+        // Update batch statistics in final transaction
+        try {
+            DB::beginTransaction();
             $batch->update([
                 'processed_rows' => $batch->processed_rows + count($validData),
                 'success_rows' => $batch->success_rows + $successCount,
@@ -341,27 +363,19 @@ class ExcelImportService
                 'status' => 'completed',
                 'completed_at' => now(),
             ]);
-            
             DB::commit();
-            
-            return [
-                'success' => true,
-                'success_count' => $successCount,
-                'failed_count' => $failedCount,
-                'updated_count' => $updatedCount,
-                'results' => $results,
-            ];
-            
         } catch (Exception $e) {
             DB::rollBack();
-            
-            $batch->update([
-                'status' => 'failed',
-                'import_summary' => ['error' => $e->getMessage()],
-            ]);
-            
-            throw $e;
+            // Continue even if batch update fails
         }
+        
+        return [
+            'success' => true,
+            'success_count' => $successCount,
+            'failed_count' => $failedCount,
+            'updated_count' => $updatedCount,
+            'results' => $results,
+        ];
     }
 
     /**

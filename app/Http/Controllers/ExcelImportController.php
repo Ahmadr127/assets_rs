@@ -252,7 +252,7 @@ class ExcelImportController extends Controller
     /**
      * Show batch details
      */
-    public function show(ImportBatch $batch)
+    public function show(Request $request, ImportBatch $batch)
     {
         // Ensure user owns this batch
         if ($batch->user_id !== auth()->id()) {
@@ -261,9 +261,30 @@ class ExcelImportController extends Controller
 
         $statistics = $this->batchService->getBatchStatistics($batch);
         
-        $logs = ImportLog::where('import_batch_id', $batch->id)
-            ->orderBy('row_index')
-            ->paginate(50);
+        // Build query with filters
+        $query = ImportLog::where('import_batch_id', $batch->id);
+        
+        // Filter by status
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        
+        // Search in mapped data
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereRaw('LOWER(mapped_data::text) LIKE ?', ['%' . strtolower($search) . '%'])
+                  ->orWhereRaw('LOWER(row_data::text) LIKE ?', ['%' . strtolower($search) . '%'])
+                  ->orWhere('row_index', 'LIKE', '%' . $search . '%');
+            });
+        }
+        
+        // Sort
+        $sortBy = $request->get('sort_by', 'row_index');
+        $sortOrder = $request->get('sort_order', 'asc');
+        $query->orderBy($sortBy, $sortOrder);
+        
+        $logs = $query->paginate(50)->withQueryString();
 
         return view('imports.show', compact('batch', 'statistics', 'logs'));
     }

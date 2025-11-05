@@ -229,7 +229,7 @@ class DataFilterService
         $resolved = $data;
         
         // Resolve location
-        if (isset($data['lokasi']) && !isset($data['location_id'])) {
+        if (!empty($data['lokasi']) && !isset($data['location_id'])) {
             $location = Location::firstOrCreate(
                 ['name' => $data['lokasi']],
                 ['description' => 'Auto-created from import']
@@ -237,26 +237,50 @@ class DataFilterService
             $resolved['location_id'] = $location->id;
         }
         
-        // Resolve status
-        if (isset($data['status']) && !isset($data['status_id'])) {
+        // Resolve status - set default if empty
+        if (!empty($data['status']) && !isset($data['status_id'])) {
+            // Normalize status value to lowercase
+            $normalizedStatus = $this->normalizeStatusValue($data['status']);
+            $resolved['status'] = $normalizedStatus;
+            
+            // Also create/find in status reference table using slug
+            $slug = \Illuminate\Support\Str::slug($data['status']);
             $status = AssetStatus::firstOrCreate(
-                ['name' => $data['status']],
-                ['description' => 'Auto-created from import']
+                ['slug' => $slug],
+                [
+                    'name' => $data['status'],
+                    'description' => 'Auto-created from import'
+                ]
             );
             $resolved['status_id'] = $status->id;
+        } elseif (empty($data['status']) && !isset($data['status_id'])) {
+            // Set default status if not provided
+            $resolved['status'] = 'aktif';
         }
         
-        // Resolve condition
-        if (isset($data['kondisi']) && !isset($data['condition_id'])) {
+        // Resolve condition - set default if empty
+        if (!empty($data['kondisi']) && !isset($data['condition_id'])) {
+            // Normalize kondisi value to lowercase
+            $normalizedKondisi = $this->normalizeKondisiValue($data['kondisi']);
+            $resolved['kondisi'] = $normalizedKondisi;
+            
+            // Also create/find in condition reference table using slug
+            $slug = \Illuminate\Support\Str::slug($data['kondisi']);
             $condition = AssetCondition::firstOrCreate(
-                ['name' => $data['kondisi']],
-                ['description' => 'Auto-created from import']
+                ['slug' => $slug],
+                [
+                    'name' => $data['kondisi'],
+                    'description' => 'Auto-created from import'
+                ]
             );
             $resolved['condition_id'] = $condition->id;
+        } elseif (empty($data['kondisi']) && !isset($data['condition_id'])) {
+            // Set default condition if not provided
+            $resolved['kondisi'] = 'baik';
         }
         
         // Resolve vendor
-        if (isset($data['vendor']) && !isset($data['vendor_id'])) {
+        if (!empty($data['vendor']) && !isset($data['vendor_id'])) {
             $vendor = Vendor::firstOrCreate(
                 ['name' => $data['vendor']],
                 ['description' => 'Auto-created from import']
@@ -265,7 +289,7 @@ class DataFilterService
         }
         
         // Resolve brand
-        if (isset($data['brand']) && !isset($data['brand_id'])) {
+        if (!empty($data['brand']) && !isset($data['brand_id'])) {
             $brand = Brand::firstOrCreate(
                 ['name' => $data['brand']],
                 ['description' => 'Auto-created from import']
@@ -274,7 +298,7 @@ class DataFilterService
         }
         
         // Resolve asset type
-        if (isset($data['tipe_fixed_asset']) && !isset($data['asset_type_id'])) {
+        if (!empty($data['tipe_fixed_asset']) && !isset($data['asset_type_id'])) {
             $type = AssetType::firstOrCreate(
                 ['name' => $data['tipe_fixed_asset']],
                 ['description' => 'Auto-created from import']
@@ -310,5 +334,67 @@ class DataFilterService
         }
         
         return $errors;
+    }
+
+    /**
+     * Normalize status value to match common patterns
+     */
+    protected function normalizeStatusValue(string $status): string
+    {
+        $normalized = strtolower(trim($status));
+        
+        // Map common variations to standard values
+        $statusMap = [
+            'aktif' => 'aktif',
+            'active' => 'aktif',
+            'tidak aktif' => 'tidak_aktif',
+            'tidak_aktif' => 'tidak_aktif',
+            'inactive' => 'tidak_aktif',
+            'non-aktif' => 'tidak_aktif',
+            'nonaktif' => 'tidak_aktif',
+            'maintenance' => 'maintenance',
+            'pemeliharaan' => 'maintenance',
+            'rusak' => 'rusak',
+            'broken' => 'rusak',
+            'damaged' => 'rusak',
+            'dijual' => 'tidak_aktif', // Map "dijual" to tidak_aktif
+            'sold' => 'tidak_aktif',
+            'hilang' => 'tidak_aktif',
+            'lost' => 'tidak_aktif',
+            'titipan' => 'aktif', // Map "titipan" to aktif
+            'dipinjam' => 'aktif',
+        ];
+        
+        return $statusMap[$normalized] ?? $normalized;
+    }
+
+    /**
+     * Normalize kondisi value to match common patterns
+     */
+    protected function normalizeKondisiValue(string $kondisi): string
+    {
+        $normalized = strtolower(trim($kondisi));
+        
+        // Map common variations to standard values
+        $kondisiMap = [
+            'baik' => 'baik',
+            'good' => 'baik',
+            'bagus' => 'baik',
+            'rusak ringan' => 'rusak_ringan',
+            'rusak_ringan' => 'rusak_ringan',
+            'slightly damaged' => 'rusak_ringan',
+            'perlu service' => 'rusak_ringan', // Map "perlu service" to rusak_ringan
+            'perlu di service' => 'rusak_ringan',
+            'perlu perbaikan' => 'rusak_ringan',
+            'rusak berat' => 'rusak_berat',
+            'rusak_berat' => 'rusak_berat',
+            'heavily damaged' => 'rusak_berat',
+            'tidak layak' => 'tidak_layak',
+            'tidak_layak' => 'tidak_layak',
+            'unusable' => 'tidak_layak',
+            'scrap' => 'tidak_layak',
+        ];
+        
+        return $kondisiMap[$normalized] ?? 'baik'; // Default to 'baik' if unknown
     }
 }

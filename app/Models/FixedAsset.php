@@ -55,16 +55,16 @@ class FixedAsset extends Model
             'nilai_awal' => 'nullable|numeric|min:0',
             'efektif_mulai' => 'nullable|date',
             'deskripsi' => 'nullable|string',
-            // denormalized legacy fields (kept nullable during transition)
+            // denormalized legacy fields (nullable with defaults)
             'lokasi' => 'nullable|string|max:255',
-            'status' => 'nullable|in:aktif,tidak_aktif,maintenance,rusak',
-            'kondisi' => 'nullable|in:baik,rusak_ringan,rusak_berat,tidak_layak',
+            'status' => 'nullable|string|max:255',
+            'kondisi' => 'nullable|string|max:255',
             'vendor' => 'nullable|string|max:255',
             'brand' => 'nullable|string|max:255',
             'code_type' => 'nullable|string|max:255',
             'serial_number' => 'nullable|string|max:255',
             'pic' => 'nullable|string|max:255',
-            'harus_dicek_fisik' => 'boolean',
+            'harus_dicek_fisik' => 'nullable|boolean',
             // normalized foreign keys
             'location_id' => 'nullable|exists:locations,id',
             'status_id' => 'nullable|exists:asset_statuses,id',

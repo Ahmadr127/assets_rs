@@ -140,6 +140,117 @@
                 </a>
             </div>
         </div>
+
+        <!-- Filters -->
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <!-- Active Filters -->
+            @if(request()->hasAny(['status', 'search']))
+                <div class="mb-4 flex flex-wrap gap-2 items-center">
+                    <span class="text-sm font-medium text-gray-700">Filter aktif:</span>
+                    @if(request('status') && request('status') !== 'all')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Status: {{ strtoupper(request('status')) }}
+                            <a href="{{ route('imports.show', ['batch' => $batch->id] + request()->except('status')) }}" 
+                               class="ml-2 text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </span>
+                    @endif
+                    @if(request('search'))
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Pencarian: "{{ request('search') }}"
+                            <a href="{{ route('imports.show', ['batch' => $batch->id] + request()->except('search')) }}" 
+                               class="ml-2 text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </span>
+                    @endif
+                </div>
+            @endif
+
+            <form method="GET" action="{{ route('imports.show', $batch->id) }}" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Status Filter -->
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="status" id="status" 
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="all" {{ request('status', 'all') === 'all' ? 'selected' : '' }}>Semua Status</option>
+                            <option value="imported" {{ request('status') === 'imported' ? 'selected' : '' }}>Imported</option>
+                            <option value="updated" {{ request('status') === 'updated' ? 'selected' : '' }}>Updated</option>
+                            <option value="error" {{ request('status') === 'error' ? 'selected' : '' }}>Error</option>
+                            <option value="duplicate" {{ request('status') === 'duplicate' ? 'selected' : '' }}>Duplicate</option>
+                            <option value="valid" {{ request('status') === 'valid' ? 'selected' : '' }}>Valid</option>
+                        </select>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="md:col-span-2">
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
+                        <input type="text" name="search" id="search" 
+                               value="{{ request('search') }}"
+                               placeholder="Cari kode, nama, atau row index..."
+                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Sort -->
+                    <div>
+                        <label for="sort_by" class="block text-sm font-medium text-gray-700 mb-1">Urutkan</label>
+                        <select name="sort_by" id="sort_by" 
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="row_index" {{ request('sort_by', 'row_index') === 'row_index' ? 'selected' : '' }}>Row Index</option>
+                            <option value="status" {{ request('sort_by') === 'status' ? 'selected' : '' }}>Status</option>
+                            <option value="processed_at" {{ request('sort_by') === 'processed_at' ? 'selected' : '' }}>Processed At</option>
+                        </select>
+                        <input type="hidden" name="sort_order" value="{{ request('sort_order', 'asc') }}">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-600">
+                        Menampilkan {{ $logs->count() }} dari {{ $logs->total() }} log
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ route('imports.show', $batch->id) }}" 
+                           class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-colors">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </a>
+                        <button type="submit" 
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                            <i class="fas fa-filter mr-2"></i>Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Quick Filters -->
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-sm font-medium text-gray-700">Filter cepat:</span>
+                    <a href="{{ route('imports.show', ['batch' => $batch->id, 'status' => 'error']) }}" 
+                       class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request('status') === 'error' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-800 hover:bg-red-200' }}">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        Errors ({{ number_format($statistics['failed_rows']) }})
+                    </a>
+                    <a href="{{ route('imports.show', ['batch' => $batch->id, 'status' => 'duplicate']) }}" 
+                       class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request('status') === 'duplicate' ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' }}">
+                        <i class="fas fa-copy mr-1"></i>
+                        Duplicates ({{ number_format($statistics['duplicate_rows']) }})
+                    </a>
+                    <a href="{{ route('imports.show', ['batch' => $batch->id, 'status' => 'imported']) }}" 
+                       class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request('status') === 'imported' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200' }}">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        Imported ({{ number_format($statistics['success_rows']) }})
+                    </a>
+                    <a href="{{ route('imports.show', ['batch' => $batch->id, 'status' => 'updated']) }}" 
+                       class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {{ request('status') === 'updated' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800 hover:bg-blue-200' }}">
+                        <i class="fas fa-sync-alt mr-1"></i>
+                        Updated ({{ number_format($statistics['updated_rows']) }})
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <div class="p-6">
             @if($logs->count() > 0)
                 <div class="overflow-x-auto">
@@ -213,7 +324,22 @@
                     {{ $logs->links() }}
                 </div>
             @else
-                <p class="text-center text-gray-500 py-8">Belum ada log untuk batch ini</p>
+                <div class="text-center py-12">
+                    <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
+                    <p class="text-gray-500 text-lg font-medium mb-2">
+                        @if(request()->hasAny(['status', 'search']))
+                            Tidak ada log yang sesuai dengan filter
+                        @else
+                            Belum ada log untuk batch ini
+                        @endif
+                    </p>
+                    @if(request()->hasAny(['status', 'search']))
+                        <a href="{{ route('imports.show', $batch->id) }}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors mt-2">
+                            <i class="fas fa-redo mr-2"></i>Reset Filter
+                        </a>
+                    @endif
+                </div>
             @endif
         </div>
     </div>
