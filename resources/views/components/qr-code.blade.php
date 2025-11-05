@@ -2,7 +2,7 @@
 
 @php
     try {
-        $url = route('fixed-assets.show', $fixedAsset);
+        $url = route('asset.public.show', $fixedAsset);
         $qrCodeSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
             ->size($size)
             ->margin(1)
@@ -43,7 +43,7 @@
         </button>
         
         <!-- Share Button -->
-        <button onclick="shareAsset({{ json_encode(route('fixed-assets.show', $fixedAsset)) }}, {{ json_encode($fixedAsset->nama_fixed_asset) }})" 
+        <button onclick="shareAsset({{ json_encode(route('asset.public.show', $fixedAsset)) }}, {{ json_encode($fixedAsset->nama_fixed_asset) }})" 
                 class="inline-flex items-center px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition"
                 title="Share Asset">
             <i class="fas fa-share-alt mr-1"></i>
@@ -51,7 +51,7 @@
         </button>
         
         <!-- Copy URL Button -->
-        <button onclick="copyToClipboard({{ json_encode(route('fixed-assets.show', $fixedAsset)) }})" 
+        <button onclick="copyToClipboard({{ json_encode(route('asset.public.show', $fixedAsset)) }})" 
                 class="inline-flex items-center px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition"
                 title="Copy URL">
             <i class="fas fa-copy mr-1"></i>
