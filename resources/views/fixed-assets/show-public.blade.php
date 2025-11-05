@@ -104,6 +104,17 @@
                             </div>
 
                             <div class="flex items-start py-1.5 border-b border-gray-100">
+                                <label class="text-xs font-semibold text-gray-500 uppercase w-28 flex-shrink-0">Nilai Awal</label>
+                                <p class="text-sm text-gray-900 flex-1 font-semibold">
+                                    @if($fixedAsset->nilai_awal)
+                                        Rp {{ number_format($fixedAsset->nilai_awal, 0, ',', '.') }}
+                                    @else
+                                        -
+                                    @endif
+                                </p>
+                            </div>
+
+                            <div class="flex items-start py-1.5 border-b border-gray-100">
                                 <label class="text-xs font-semibold text-gray-500 uppercase w-28 flex-shrink-0">Efektif Mulai</label>
                                 <p class="text-sm text-gray-900 flex-1">{{ $fixedAsset->efektif_mulai->format('d F Y') }}</p>
                             </div>

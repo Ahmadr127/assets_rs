@@ -1,0 +1,181 @@
+
+Buatkan implementasi fitur import data dari file Excel dengan kemampuan mapping header kolom, filtering data duplikat, validasi, dan preview data sebelum disimpan. Fitur harus mengikuti struktur CRUD yang sudah ada dan menyediakan interface untuk testing dan debugging.
+
+## Requirements Fitur
+
+### 1. Struktur Data yang Diperlukan
+```php
+// Database migrations yang diperlukan
+- users (existing)
+- import_batches (new)
+- import_logs (new) 
+- [existing business tables]
+```
+
+### 2. Flow Proses Import
+```
+Upload File → Detect Headers → Mapping → Validation → Preview → Save/Update
+```
+
+### 3. Fitur yang Harus Diimplementasi
+
+#### A. Header Detection & Mapping
+- Auto-detect headers dari file Excel
+- Mapping ke kolom database yang sesuai
+- Validasi tipe data dan format
+
+#### B. Data Filtering & Validation
+- Deteksi duplikasi berdasarkan key unik
+- Validasi data required
+- Filter data invalid/error
+- Handle data existing (update/create)
+
+#### C. Preview & Debugging
+- Tabel preview data yang akan diimport
+- Highlight data error/duplikat
+- Summary statistics
+- Download filtered data untuk review
+
+## Technical Implementation Prompt
+
+```php
+// Buatkan implementasi Laravel dengan:
+// 1. Service Classes untuk business logic
+// 2. Jobs untuk processing background
+// 3. Requests untuk validation
+// 4. Resources/Collections untuk API responses
+// 5. Blade components untuk UI
+// 6. Exportable filtered data
+
+## Service Classes yang Diperlukan:
+
+### ExcelImportService
+- detectHeaders($file)
+- mapHeaders($detectedHeaders, $mappingConfig)
+- validateData($mappedData)
+- filterDuplicates($validatedData)
+- processImport($filteredData, $batchId)
+
+### DataFilterService
+- findDuplicates($data, $uniqueKeys)
+- validateRequiredFields($data, $rules)
+- flagExistingRecords($data, $existingKeys)
+- generateImportSummary($data)
+
+### ImportBatchService
+- createImportBatch($file, $user)
+- updateBatchStatus($batchId, $status, $summary)
+- logImportResults($batchId, $results)
+```
+
+## Database Structure Prompt
+
+```sql
+-- Buatkan migration untuk:
+-- import_batches table
+- id, user_id, original_filename, stored_filename, total_rows, processed_rows, 
+  failed_rows, status, mapping_config, import_summary, created_at, updated_at
+
+-- import_logs table  
+- id, import_batch_id, row_index, row_data, status, errors, created_at
+
+-- Tambahkan columns jika diperlukan di existing tables untuk tracking imports
+```
+
+## API/Controller Prompt
+
+```php
+// Buatkan controllers dengan methods:
+- ExcelImportController
+  • showUploadForm()
+  • uploadAndDetect(Request $request)
+  • configureMapping(Request $request, $batchId)
+  • previewImport(Request $request, $batchId)
+  • processImport(Request $request, $batchId)
+  • getImportProgress($batchId)
+  • downloadFilteredData($batchId)
+
+// Request validations
+- ExcelUploadRequest
+- MappingConfigurationRequest  
+- ImportConfirmationRequest
+```
+
+## UI/Blade Components Prompt
+
+```blade
+<!-- Buatkan components untuk: -->
+- excel-upload-dropzone
+- header-mapping-table
+- import-preview-table
+- validation-errors-panel
+- import-progress-tracker
+- filtered-data-download
+```
+
+## Testing & Debugging Features Prompt
+
+```php
+// Buatkan features untuk testing:
+- Preview data sebelum save
+- Download data yang difilter (error, duplicates, new)
+- Import summary report
+- Real-time progress tracking
+- Rollback capability untuk batch import
+
+// Example debug output structure:
+{
+    "batch_id": "xxx",
+    "total_rows": 1000,
+    "valid_rows": 850,
+    "duplicate_rows": 100,
+    "error_rows": 50,
+    "errors": [
+        {"row": 15, "field": "email", "error": "Invalid format"},
+        {"row": 23, "field": "phone", "error": "Required field missing"}
+    ],
+    "duplicates": [
+        {"row": 45, "existing_id": 123, "matched_fields": ["email"]}
+    ]
+}
+```
+
+## Best Practices Requirements
+
+1. **Queue Processing** untuk file besar
+2. **Chunk Reading** untuk memory efficiency
+3. **Transaction Handling** untuk data consistency
+4. **Progress Tracking** untuk user feedback
+5. **Error Handling** yang comprehensive
+6. **Security** - validate file types, prevent injections
+7. **Performance** - indexing, eager loading
+8. **Maintainability** - service pattern, repository pattern
+
+## Example Usage Flow
+
+```php
+// 1. User uploads Excel file
+$batch = $importService->createBatch($file, auth()->id());
+
+// 2. System detects headers
+$headers = $importService->detectHeaders($batch);
+
+// 3. User maps headers to system fields
+$mapping = $request->get('mapping');
+$importService->configureMapping($batch, $mapping);
+
+// 4. System processes and filters data
+$results = $importService->previewImport($batch);
+
+// 5. User reviews filtered data
+return view('import.preview', [
+    'validData' => $results['valid'],
+    'duplicates' => $results['duplicates'],
+    'errors' => $results['errors']
+]);
+
+// 6. User confirms import
+$importService->processImport($batch, $request->get('action'));
+```
+
+Buatkan implementasi lengkap berdasarkan requirements di atas dengan mengikuti best practices Laravel dan menyertakan testing yang memadai.

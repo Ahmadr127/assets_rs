@@ -31,6 +31,14 @@ class MenuPermissionSeeder extends Seeder
                 'group' => 'menu'
             ],
             
+            // Import Data
+            [
+                'name' => 'menu_import_data',
+                'display_name' => 'Menu Import Data',
+                'description' => 'Akses menu Import Data di sidebar',
+                'group' => 'menu'
+            ],
+            
             // Master Data
             [
                 'name' => 'menu_master_data',

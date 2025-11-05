@@ -15,6 +15,7 @@ use App\Http\Controllers\Masters\BrandController;
 use App\Http\Controllers\Masters\AssetTypeController;
 use App\Http\Controllers\QRCodeController;
 use App\Http\Controllers\DinamicLookupController;
+use App\Http\Controllers\ExcelImportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +64,24 @@ Route::middleware('auth')->group(function () {
     // Fixed Assets Management routes
     Route::middleware('permission:manage_fixed_assets')->group(function () {
         Route::resource('fixed-assets', FixedAssetController::class);
+
+        // Excel Import routes
+        Route::prefix('imports')->as('imports.')->group(function () {
+            Route::get('/', [ExcelImportController::class, 'index'])->name('index');
+            Route::get('/create', [ExcelImportController::class, 'create'])->name('create');
+            Route::post('/upload', [ExcelImportController::class, 'uploadAndDetect'])->name('upload');
+            Route::get('/{batch}/mapping', [ExcelImportController::class, 'showMapping'])->name('mapping');
+            Route::post('/{batch}/configure-mapping', [ExcelImportController::class, 'configureMapping'])->name('configure-mapping');
+            Route::get('/{batch}/preview', [ExcelImportController::class, 'preview'])->name('preview');
+            Route::post('/{batch}/process', [ExcelImportController::class, 'processImport'])->name('process');
+            Route::get('/{batch}/progress', [ExcelImportController::class, 'progress'])->name('progress');
+            Route::get('/{batch}/progress-data', [ExcelImportController::class, 'getProgress'])->name('progress-data');
+            Route::get('/{batch}/download-filtered', [ExcelImportController::class, 'downloadFilteredData'])->name('download-filtered');
+            Route::get('/{batch}', [ExcelImportController::class, 'show'])->name('show');
+            Route::delete('/{batch}', [ExcelImportController::class, 'destroy'])->name('destroy');
+            Route::post('/{batch}/cancel', [ExcelImportController::class, 'cancel'])->name('cancel');
+            Route::post('/{batch}/retry', [ExcelImportController::class, 'retry'])->name('retry');
+        });
 
         // Masters (Lokasi, Status, Kondisi, Vendor, Brand, Tipe)
         Route::prefix('masters')->as('masters.')->group(function () {

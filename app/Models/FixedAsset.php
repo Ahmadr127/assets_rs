@@ -15,6 +15,7 @@ class FixedAsset extends Model
         'kode_manual',
         'nama_fixed_asset',
         'taksiran_umur',
+        'nilai_awal',
         'efektif_mulai',
         'deskripsi',
         'lokasi',
@@ -38,7 +39,8 @@ class FixedAsset extends Model
     protected $casts = [
         'efektif_mulai' => 'date',
         'harus_dicek_fisik' => 'boolean',
-        'taksiran_umur' => 'integer'
+        'taksiran_umur' => 'integer',
+        'nilai_awal' => 'decimal:2'
     ];
 
     // Validation rules
@@ -46,11 +48,12 @@ class FixedAsset extends Model
     {
         return [
             'tipe_fixed_asset' => 'nullable|string|max:255',
-            'kode' => 'required|string|max:255|unique:fixed_assets,kode' . ($id ? ',' . $id : ''),
+            'kode' => 'nullable|string|max:255|unique:fixed_assets,kode' . ($id ? ',' . $id : ''),
             'kode_manual' => 'nullable|string|max:255',
-            'nama_fixed_asset' => 'required|string|max:255',
-            'taksiran_umur' => 'required|integer|min:1|max:100',
-            'efektif_mulai' => 'required|date',
+            'nama_fixed_asset' => 'nullable|string|max:255',
+            'taksiran_umur' => 'nullable|integer|min:1|max:100',
+            'nilai_awal' => 'nullable|numeric|min:0',
+            'efektif_mulai' => 'nullable|date',
             'deskripsi' => 'nullable|string',
             // denormalized legacy fields (kept nullable during transition)
             'lokasi' => 'nullable|string|max:255',
@@ -60,15 +63,15 @@ class FixedAsset extends Model
             'brand' => 'nullable|string|max:255',
             'code_type' => 'nullable|string|max:255',
             'serial_number' => 'nullable|string|max:255',
-            'pic' => 'required|string|max:255',
+            'pic' => 'nullable|string|max:255',
             'harus_dicek_fisik' => 'boolean',
             // normalized foreign keys
-            'location_id' => 'required|exists:locations,id',
-            'status_id' => 'required|exists:asset_statuses,id',
-            'condition_id' => 'required|exists:asset_conditions,id',
+            'location_id' => 'nullable|exists:locations,id',
+            'status_id' => 'nullable|exists:asset_statuses,id',
+            'condition_id' => 'nullable|exists:asset_conditions,id',
             'vendor_id' => 'nullable|exists:vendors,id',
             'brand_id' => 'nullable|exists:brands,id',
-            'asset_type_id' => 'required|exists:asset_types,id',
+            'asset_type_id' => 'nullable|exists:asset_types,id',
         ];
     }
 

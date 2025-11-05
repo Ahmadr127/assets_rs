@@ -73,6 +73,7 @@
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kondisi</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">PIC</th>
+                        <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nilai Awal</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Efektif Mulai</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Taksiran Umur (thn)</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
@@ -122,6 +123,13 @@
                         </td>
                         <td class="px-2 py-2 text-xs text-gray-900">{{ Str::limit($asset->pic, 20) }}</td>
                         <td class="px-2 py-2 text-xs text-gray-900">
+                            @if($asset->nilai_awal)
+                                Rp {{ number_format($asset->nilai_awal, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td class="px-2 py-2 text-xs text-gray-900">
                             @if($asset->efektif_mulai)
                                 {{ $asset->efektif_mulai->format('d/m/Y') }}
                             @else
@@ -154,7 +162,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="11" class="px-2 py-6 text-center text-xs text-gray-500">
+                        <td colspan="12" class="px-2 py-6 text-center text-xs text-gray-500">
                             <i class="fas fa-inbox text-2xl text-gray-300 mb-1"></i>
                             <div>Tidak ada data</div>
                         </td>

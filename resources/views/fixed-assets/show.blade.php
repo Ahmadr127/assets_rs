@@ -97,8 +97,25 @@
                         <dd class="text-sm text-gray-900">{{ $fixedAsset->taksiran_umur }} tahun</dd>
                     </div>
                     <div class="flex items-center py-1.5 border-b border-gray-100">
+                        <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Nilai Awal</dt>
+                        <dd class="text-sm text-gray-900 font-semibold">
+                            @if($fixedAsset->nilai_awal)
+                                Rp {{ number_format($fixedAsset->nilai_awal, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
+                        </dd>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Efektif Mulai</dt>
                         <dd class="text-sm text-gray-900">{{ $fixedAsset->efektif_mulai->format('d F Y') }}</dd>
+                    </div>
+                    <div class="flex items-center py-1.5 border-b border-gray-100">
+                        <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Umur Aset</dt>
+                        <dd class="text-sm text-gray-900">{{ $fixedAsset->age_display }}</dd>
                     </div>
                 </div>
 
