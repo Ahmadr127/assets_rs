@@ -39,7 +39,14 @@ class ExcelImportService
             $cellIterator->setIterateOnlyExistingCells(false);
             
             foreach ($cellIterator as $cell) {
-                $value = $cell->getValue();
+                // Get calculated value if it's a formula, otherwise get the raw value
+                try {
+                    $value = $cell->getCalculatedValue();
+                } catch (\Exception $e) {
+                    // If calculation fails, fallback to raw value
+                    $value = $cell->getValue();
+                }
+                
                 if ($value !== null && $value !== '') {
                     $headers[] = [
                         'excel_column' => $cell->getColumn(),
@@ -64,6 +71,10 @@ class ExcelImportService
             // Exact matches
             'kode' => 'kode',
             'kode_manual' => 'kode_manual',
+            'po' => 'po',
+            'asset_number' => 'asset_number',
+            'asset number' => 'asset_number',
+            'nomor asset' => 'asset_number',
             'nama_fixed_asset' => 'nama_fixed_asset',
             'nama fixed asset' => 'nama_fixed_asset',
             'tipe_fixed_asset' => 'tipe_fixed_asset',
@@ -103,6 +114,8 @@ class ExcelImportService
             'condition' => 'kondisi',
             'serial' => 'serial_number',
             'sn' => 'serial_number',
+            'purchase order' => 'po',
+            'purchase_order' => 'po',
         ];
         
         $normalized = strtolower(trim($excelHeader));
@@ -133,7 +146,14 @@ class ExcelImportService
                 
                 foreach ($cellIterator as $cell) {
                     $column = $cell->getColumn();
-                    $value = $cell->getValue();
+                    
+                    // Get calculated value if it's a formula, otherwise get the raw value
+                    try {
+                        $value = $cell->getCalculatedValue();
+                    } catch (\Exception $e) {
+                        // If calculation fails, fallback to raw value
+                        $value = $cell->getValue();
+                    }
                     
                     // Store original data
                     $rowData[$column] = $value;
@@ -272,7 +292,14 @@ class ExcelImportService
         $updatedCount = 0;
         $results = [];
         
-        foreach ($validData as $item) {
+        $totalRows = count($validData);
+        \Log::info("Starting import process", [
+            'batch_id' => $batch->id,
+            'total_rows' => $totalRows,
+            'action' => $action
+        ]);
+        
+        foreach ($validData as $index => $item) {
             // Use individual transaction for each row to prevent cascading failures
             DB::beginTransaction();
             
@@ -282,6 +309,11 @@ class ExcelImportService
                 // Auto-generate kode if not provided
                 if (empty($mappedData['kode'])) {
                     $mappedData['kode'] = $this->generateUniqueKode();
+                }
+                
+                // Auto-generate kode_manual if not provided (must be unique)
+                if (empty($mappedData['kode_manual'])) {
+                    $mappedData['kode_manual'] = $this->generateUniqueKodeManual();
                 }
                 
                 // Resolve foreign keys and set defaults
@@ -322,6 +354,19 @@ class ExcelImportService
                     'id' => $asset->id,
                 ];
                 
+                // Log progress every 100 rows
+                if (($index + 1) % 100 === 0) {
+                    $progress = round((($index + 1) / $totalRows) * 100, 2);
+                    \Log::info("Import progress", [
+                        'batch_id' => $batch->id,
+                        'processed' => $index + 1,
+                        'total' => $totalRows,
+                        'progress' => $progress . '%',
+                        'success' => $successCount,
+                        'failed' => $failedCount
+                    ]);
+                }
+                
             } catch (Exception $e) {
                 DB::rollBack();
                 $failedCount++;
@@ -351,6 +396,15 @@ class ExcelImportService
                 ];
             }
         }
+        
+        // Log final summary
+        \Log::info("Import process completed", [
+            'batch_id' => $batch->id,
+            'total_processed' => count($validData),
+            'success' => $successCount,
+            'failed' => $failedCount,
+            'updated' => $updatedCount
+        ]);
         
         // Update batch statistics in final transaction
         try {
@@ -400,6 +454,31 @@ class ExcelImportService
         }
         
         // Format: FA20250105-0001
+        return $prefix . $date . '-' . str_pad($newSequence, 4, '0', STR_PAD_LEFT);
+    }
+    
+    /**
+     * Generate unique kode_manual for fixed asset
+     */
+    protected function generateUniqueKodeManual(): string
+    {
+        $prefix = 'FAM';
+        $date = date('Ymd');
+        
+        // Get last kode_manual for today
+        $lastAsset = FixedAsset::where('kode_manual', 'like', $prefix . $date . '%')
+            ->orderBy('kode_manual', 'desc')
+            ->first();
+        
+        if ($lastAsset) {
+            // Extract sequence number and increment
+            $lastSequence = (int) substr($lastAsset->kode_manual, -4);
+            $newSequence = $lastSequence + 1;
+        } else {
+            $newSequence = 1;
+        }
+        
+        // Format: FAM20250108-0001
         return $prefix . $date . '-' . str_pad($newSequence, 4, '0', STR_PAD_LEFT);
     }
 }

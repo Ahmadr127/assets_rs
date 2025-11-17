@@ -37,16 +37,29 @@ class ProcessExcelImport implements ShouldQueue
     public function handle(ExcelImportService $importService, ImportBatchService $batchService): void
     {
         try {
-            Log::info("Starting import job for batch {$this->batch->id}");
+            Log::info("Starting import job for batch {$this->batch->id}", [
+                'filename' => $this->batch->filename,
+                'total_rows' => $this->batch->total_rows,
+                'queue_driver' => config('queue.default')
+            ]);
             
             // Update status to processing
             $batchService->updateBatchStatus($this->batch, 'processing');
+            Log::info("Batch {$this->batch->id} status updated to processing");
             
             // Read and map data
+            Log::info("Reading Excel file for batch {$this->batch->id}");
             $data = $importService->readAndMapData($this->batch);
+            Log::info("Excel file read completed", ['rows_read' => count($data)]);
             
             // Validate and filter data
+            Log::info("Starting validation for batch {$this->batch->id}");
             $validatedData = $importService->validateAndFilterData($this->batch, $data);
+            Log::info("Validation completed", [
+                'valid' => count($validatedData['valid']),
+                'errors' => count($validatedData['errors']),
+                'duplicates' => count($validatedData['duplicates'])
+            ]);
             
             // Save validation results
             $batchService->saveValidationResults($this->batch, $validatedData);

@@ -175,12 +175,26 @@ class ExcelImportController extends Controller
         try {
             $action = $request->input('action', 'create');
 
-            // Dispatch job for background processing
-            ProcessExcelImport::dispatch($batch, $action);
-
-            return redirect()
-                ->route('imports.progress', $batch->id)
-                ->with('success', 'Import sedang diproses. Silakan tunggu...');
+            // Check if queue is sync (for cPanel/shared hosting)
+            if (config('queue.default') === 'sync') {
+                // Increase limits for large imports
+                set_time_limit(600); // 10 minutes
+                ini_set('memory_limit', '512M');
+                
+                // Process immediately without queue
+                ProcessExcelImport::dispatchSync($batch, $action);
+                
+                return redirect()
+                    ->route('imports.show', $batch->id)
+                    ->with('success', 'Import berhasil diproses!');
+            } else {
+                // Dispatch job for background processing (local/VPS)
+                ProcessExcelImport::dispatch($batch, $action);
+                
+                return redirect()
+                    ->route('imports.progress', $batch->id)
+                    ->with('success', 'Import sedang diproses. Silakan tunggu...');
+            }
         } catch (Exception $e) {
             return back()
                 ->withErrors(['error' => 'Gagal memproses import: ' . $e->getMessage()]);
@@ -362,6 +376,8 @@ class ExcelImportController extends Controller
         return [
             'kode' => 'Kode (Auto-generated jika kosong)',
             'kode_manual' => 'Kode Manual',
+            'po' => 'Purchase Order (PO)',
+            'asset_number' => 'Asset Number',
             'nama_fixed_asset' => 'Nama Fixed Asset',
             'tipe_fixed_asset' => 'Tipe Fixed Asset',
             'taksiran_umur' => 'Taksiran Umur (tahun)',

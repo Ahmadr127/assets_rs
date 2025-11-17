@@ -13,6 +13,8 @@ class FixedAsset extends Model
         'tipe_fixed_asset',
         'kode',
         'kode_manual',
+        'po',
+        'asset_number',
         'nama_fixed_asset',
         'taksiran_umur',
         'nilai_awal',
@@ -48,8 +50,10 @@ class FixedAsset extends Model
     {
         return [
             'tipe_fixed_asset' => 'nullable|string|max:255',
-            'kode' => 'nullable|string|max:255|unique:fixed_assets,kode' . ($id ? ',' . $id : ''),
-            'kode_manual' => 'nullable|string|max:255',
+            'kode' => 'nullable|string|max:255', // kode can be duplicate (no unique constraint)
+            'kode_manual' => 'nullable|string|max:255|unique:fixed_assets,kode_manual' . ($id ? ',' . $id : ''),
+            'po' => 'nullable|string|max:255',
+            'asset_number' => 'nullable|string|max:255',
             'nama_fixed_asset' => 'nullable|string|max:255',
             'taksiran_umur' => 'nullable|integer|min:1|max:100',
             'nilai_awal' => 'nullable|numeric|min:0',

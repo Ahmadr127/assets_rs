@@ -14,123 +14,98 @@
         body {
             font-family: 'Arial', sans-serif;
             background: white;
-            color: #333;
-            line-height: 1.3;
+            color: #000;
+            line-height: 1.2;
         }
         
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 15px;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 0;
         }
         
-        .header {
-            text-align: center;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-        }
-        
-        .header h1 {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
-        
-        .header p {
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .qr-section {
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .qr-code {
-            flex-shrink: 0;
-            text-align: center;
-            border: 2px solid #333;
+        /* Label Stiker Style - seperti di gambar */
+        .label-stiker {
+            border: 2px solid #000;
             padding: 10px;
             background: white;
+            display: inline-block;
+            width: 100%;
+            max-width: 350px;
+        }
+        
+        .label-content {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+        }
+        
+        /* QR Code di Kiri */
+        .qr-code {
+            flex-shrink: 0;
+            border: 1px solid #000;
+            padding: 5px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .qr-code svg {
             display: block;
-            max-width: 200px;
-            max-height: 200px;
-            width: 100%;
-            height: auto;
+            width: 120px;
+            height: 120px;
         }
         
+        /* Info di Kanan */
         .asset-info {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px 0;
         }
         
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        
-        .info-item {
-            border-bottom: 1px solid #eee;
-            padding-bottom: 4px;
-        }
-        
-        .info-label {
-            font-size: 10px;
-            color: #666;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-        
-        .info-value {
-            font-size: 11px;
-            font-weight: 500;
-        }
-        
-        .url-section {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 3px;
-            padding: 10px;
-            margin-bottom: 12px;
-        }
-        
-        .url-label {
-            font-size: 10px;
-            color: #666;
-            margin-bottom: 3px;
-            font-weight: bold;
-        }
-        
-        .url-value {
-            font-size: 10px;
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-            background: white;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 2px;
-        }
-        
-        .footer {
+        .logo-section {
             text-align: center;
-            font-size: 9px;
-            color: #666;
-            border-top: 1px solid #eee;
-            padding-top: 8px;
+            margin-bottom: 8px;
         }
         
+        .logo-section img {
+            max-width: 100%;
+            height: auto;
+            max-height: 35px;
+        }
+        
+        .nama-barang {
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            word-wrap: break-word;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .kode-manual {
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            padding: 3px 5px;
+            border: 1px solid #000;
+            background: white;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Instructions (no-print) */
         .instructions {
             background: #e3f2fd;
             border-left: 3px solid #2196f3;
             padding: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
         
         .instructions h3 {
@@ -144,8 +119,58 @@
             color: #333;
         }
         
-        /* Print styles */
+        /* Print styles - Custom Label Size */
         @media print {
+            @page {
+                size: 100mm 60mm;
+                margin: 0;
+            }
+            
+            html, body {
+                width: 100mm;
+                height: 60mm;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .container {
+                margin: 0;
+                padding: 5mm;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .label-stiker {
+                page-break-inside: avoid;
+                border: 2px solid #000;
+                max-width: 90mm;
+                width: 100%;
+            }
+            
+            .qr-code {
+                border: 1px solid #000;
+            }
+            
+            .qr-code svg {
+                width: 110px;
+                height: 110px;
+            }
+            
+            .kode-manual {
+                border: 1px solid #000;
+            }
+        }
+        
+        /* Print styles alternative - A4 with multiple labels */
+        @media print {
+            /* Uncomment this and comment above for A4 multiple labels
             @page {
                 size: A4;
                 margin: 10mm;
@@ -157,102 +182,70 @@
             }
             
             .container {
-                max-width: none;
                 margin: 0;
                 padding: 0;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10mm;
             }
-            
-            .no-print {
-                display: none !important;
-            }
-            
-            .qr-section {
-                page-break-inside: avoid;
-            }
-            
-            .header {
-                margin-bottom: 10px;
-                padding-bottom: 8px;
-            }
-            
-            .qr-section {
-                margin-bottom: 10px;
-                gap: 15px;
-            }
-            
-            .qr-code {
-                padding: 8px;
-            }
-            
-            .qr-code svg {
-                max-width: 180px;
-                max-height: 180px;
-            }
-            
-            .info-grid {
-                gap: 5px;
-            }
-            
-            .info-item {
-                padding-bottom: 3px;
-            }
-            
-            .url-section {
-                padding: 6px;
-                margin-bottom: 8px;
-            }
-            
-            .footer {
-                padding-top: 5px;
-                font-size: 8px;
-            }
-            
-            .instructions {
-                padding: 8px;
-                margin-bottom: 8px;
-            }
+            */
         }
         
         /* Mobile responsive */
         @media (max-width: 768px) {
-            .qr-section {
-                flex-direction: column;
-                align-items: center;
+            .container {
+                max-width: 100%;
+                padding: 10px;
             }
             
-            .info-grid {
-                grid-template-columns: 1fr;
+            .label-stiker {
+                max-width: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>QR Code Asset</h1>
-            <p>{{ $fixedAsset->nama_fixed_asset }}</p>
-        </div>
-        
         <!-- Instructions -->
         <div class="instructions no-print">
-            <h3>Cara Menggunakan QR Code</h3>
-            <p>Scan QR Code ini menggunakan aplikasi kamera atau QR scanner untuk melihat detail lengkap asset secara online.</p>
+            <h3>Cara Menggunakan QR Code Label</h3>
+            <p>Scan QR Code ini menggunakan aplikasi kamera atau QR scanner untuk melihat detail lengkap asset. Klik Print untuk mencetak label.</p>
         </div>
         
-        <!-- QR Code and Asset Info -->
-        <div class="qr-section">
-            <div class="qr-code">
-                {!! $qrCodeSvg !!}
-            </div>        
+        <!-- Label Stiker -->
+        <div class="label-stiker">
+            <div class="label-content">
+                <!-- QR Code di Kiri -->
+                <div class="qr-code">
+                    {!! $qrCodeSvg !!}
+                </div>
+                
+                <!-- Info di Kanan -->
+                <div class="asset-info">
+                    <!-- Logo -->
+                    <div class="logo-section">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" onerror="this.style.display='none'">
+                    </div>
+                    
+                    <!-- Nama Barang -->
+                    <div class="nama-barang">
+                        {{ $fixedAsset->nama_fixed_asset }}
+                    </div>
+                    
+                    <!-- Kode Manual -->
+                    <div class="kode-manual">
+                        {{ $fixedAsset->kode_manual ?? $fixedAsset->kode ?? '-' }}
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- Footer -->
-        <div class="footer">
-            <p>
-                <strong>Asset Management System</strong><br>
-                QR Code dibuat pada: {{ $generatedAt }}<br>
-                ID Asset: #{{ $fixedAsset->id }}
-            </p>
+        
+        <!-- Info Tambahan (no-print) -->
+        <div class="no-print" style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 11px;">
+            <p><strong>ID Asset:</strong> #{{ $fixedAsset->id }}</p>
+            <p><strong>Kode:</strong> {{ $fixedAsset->kode ?? '-' }}</p>
+            <p><strong>Kode Manual:</strong> {{ $fixedAsset->kode_manual ?? '-' }}</p>
+            <p><strong>Dibuat pada:</strong> {{ $generatedAt }}</p>
         </div>
     </div>
     

@@ -298,6 +298,35 @@
 
     <!-- Action Buttons -->
     @if(count($validatedData['valid']) > 0)
+        <!-- Queue Status Info -->
+        @php
+            $queueDriver = config('queue.default');
+            $isSync = $queueDriver === 'sync';
+        @endphp
+        
+        @if($isSync)
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-semibold mb-1">Mode: Synchronous Processing</p>
+                        <p>Import akan diproses langsung. Browser akan menunggu hingga proses selesai (~6 menit untuk 2,396 rows).</p>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mr-3 mt-0.5"></i>
+                    <div class="text-sm text-yellow-800">
+                        <p class="font-semibold mb-1">Mode: Queue Processing ({{ $queueDriver }})</p>
+                        <p>Pastikan queue worker sudah berjalan: <code class="bg-yellow-100 px-2 py-1 rounded">php artisan queue:work</code></p>
+                        <p class="mt-1 text-xs">Jika di cPanel/shared hosting, ubah <code class="bg-yellow-100 px-1 rounded">QUEUE_CONNECTION=sync</code> di file .env</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+        
         <div class="bg-white shadow-sm rounded-lg p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Pilih Aksi Import</h3>
             <form action="{{ route('imports.process', $batch->id) }}" method="POST">

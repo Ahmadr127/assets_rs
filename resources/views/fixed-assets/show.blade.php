@@ -46,6 +46,18 @@
                     </div>
                 </div>
 
+                <!-- New fields: PO and Asset Number -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div class="flex items-center py-1.5 border-b border-gray-100">
+                        <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Purchase Order</dt>
+                        <dd class="text-sm text-gray-900">{{ $fixedAsset->po ?: '-' }}</dd>
+                    </div>
+                    <div class="flex items-center py-1.5 border-b border-gray-100">
+                        <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Asset Number</dt>
+                        <dd class="text-sm text-gray-900">{{ $fixedAsset->asset_number ?: '-' }}</dd>
+                    </div>
+                </div>
+
                 <!-- Nama Asset + Lokasi (same row to utilize space) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div class="flex items-start py-1.5 border-b border-gray-100">

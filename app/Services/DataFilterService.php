@@ -20,6 +20,9 @@ class DataFilterService
     {
         $rules = [
             'kode' => 'nullable|string|max:255',
+            'kode_manual' => 'nullable|string|max:255',
+            'po' => 'nullable|string|max:255',
+            'asset_number' => 'nullable|string|max:255',
             'nama_fixed_asset' => 'nullable|string|max:255',
             'taksiran_umur' => 'nullable|integer|min:1|max:100',
             'efektif_mulai' => 'nullable|date',
@@ -39,25 +42,26 @@ class DataFilterService
 
     /**
      * Check for duplicate records
+     * Detects duplicates based on kode_manual OR nama+lokasi combination
      */
     public function checkDuplicate(array $data): array
     {
-        // Check by kode if provided (primary unique key)
-        if (isset($data['kode']) && !empty($data['kode'])) {
-            $existing = FixedAsset::where('kode', $data['kode'])->first();
+        // Check by kode_manual if provided (primary unique key)
+        if (isset($data['kode_manual']) && !empty($data['kode_manual'])) {
+            $existing = FixedAsset::where('kode_manual', $data['kode_manual'])->first();
             
             if ($existing) {
                 return [
                     'is_duplicate' => true,
-                    'key' => 'kode',
-                    'value' => $data['kode'],
+                    'key' => 'kode_manual',
+                    'value' => $data['kode_manual'],
                     'existing_id' => $existing->id,
                     'existing_record' => $existing,
                 ];
             }
         }
         
-        // If no kode, check by combination of nama + lokasi (optional duplicate check)
+        // Check by combination of nama + lokasi (alternative duplicate detection)
         if (isset($data['nama_fixed_asset']) && !empty($data['nama_fixed_asset'])) {
             $query = FixedAsset::where('nama_fixed_asset', $data['nama_fixed_asset']);
             
