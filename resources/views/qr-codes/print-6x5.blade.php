@@ -102,7 +102,7 @@
             }
             
             .nama-barang {
-                font-size: 11pt;
+                font-size: 7pt;
                 font-weight: bold;
                 text-align: center;
                 line-height: 1.05;
@@ -117,7 +117,7 @@
             }
             
             .kode-manual {
-                font-size: 9pt;
+                font-size: 7pt;
                 font-weight: bold;
                 text-align: center;
                 padding: 0.8mm 1mm;

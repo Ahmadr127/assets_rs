@@ -61,9 +61,30 @@ class FixedAssetController extends Controller
     {
         $query = FixedAsset::with(['location','statusRef','conditionRef','vendorRef','brandRef','typeRef']);
 
-        // Search functionality
+        // Nama Asset filter
+        if ($request->filled('nama_fixed_asset')) {
+            $query->where('nama_fixed_asset', $request->nama_fixed_asset);
+        }
+
+        // Kode filter
+        if ($request->filled('kode')) {
+            $query->where('kode', $request->kode);
+        }
+
+        // Search functionality (PIC only now)
         if ($request->filled('search')) {
-            $query->search($request->search);
+            $search = $request->search;
+            $query->where('pic', 'like', "%{$search}%");
+        }
+
+        // Location filter
+        if ($request->filled('location_id')) {
+            $query->where('location_id', $request->location_id);
+        }
+
+        // Asset Type filter
+        if ($request->filled('asset_type_id')) {
+            $query->where('asset_type_id', $request->asset_type_id);
         }
 
         // Status filter (normalized)
@@ -90,10 +111,34 @@ class FixedAssetController extends Controller
 
         $fixedAssets = $query->paginate(15)->withQueryString();
 
+        // Get unique values for nama and kode dropdowns
+        $namaOptions = FixedAsset::whereNotNull('nama_fixed_asset')
+            ->where('nama_fixed_asset', '!=', '')
+            ->distinct()
+            ->orderBy('nama_fixed_asset')
+            ->pluck('nama_fixed_asset', 'nama_fixed_asset');
+        
+        $kodeOptions = FixedAsset::whereNotNull('kode')
+            ->where('kode', '!=', '')
+            ->distinct()
+            ->orderBy('kode')
+            ->pluck('kode', 'kode');
+
+        // Master data for filters
+        $locations = Location::orderBy('name')->pluck('name','id');
+        $types = AssetType::orderBy('name')->pluck('name','id');
         $statuses = AssetStatus::orderBy('name')->pluck('name','id');
         $conditions = AssetCondition::orderBy('name')->pluck('name','id');
 
-        return view('fixed-assets.index', compact('fixedAssets','statuses','conditions'));
+        return view('fixed-assets.index', compact(
+            'fixedAssets',
+            'namaOptions',
+            'kodeOptions',
+            'locations',
+            'types',
+            'statuses',
+            'conditions'
+        ));
     }
 
     /**

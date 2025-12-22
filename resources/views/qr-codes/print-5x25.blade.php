@@ -102,7 +102,7 @@
             }
             
             .nama-barang {
-                font-size: 8pt;
+                font-size: 6.5pt;
                 font-weight: bold;
                 text-align: center;
                 line-height: 0.9;
