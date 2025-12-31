@@ -88,6 +88,22 @@
                     @error('taksiran_umur')<p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
 
+                <!-- Nilai Awal -->
+                <div>
+                    <label for="nilai_awal" class="block text-xs font-medium text-gray-700 mb-1">
+                        Nilai Awal (Rp)
+                    </label>
+                    <input type="number" 
+                           id="nilai_awal" 
+                           name="nilai_awal" 
+                           value="{{ old('nilai_awal') }}"
+                           min="0"
+                           step="0.01"
+                           class="block w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 @error('nilai_awal') border-red-300 @enderror"
+                           placeholder="0">
+                    @error('nilai_awal')<p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
+
                 <!-- Efektif Mulai -->
                 <div>
                     <label for="efektif_mulai" class="block text-xs font-medium text-gray-700 mb-1">

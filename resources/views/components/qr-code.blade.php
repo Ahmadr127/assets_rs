@@ -23,16 +23,35 @@
     <!-- Title -->
     <p class="text-xs text-gray-600 mb-2 truncate">{{ $fixedAsset->nama_fixed_asset }}</p>
     
+    <!-- Print Format Selector -->
+    @php
+        $printFormats = \App\Models\PrintFormat::getActive();
+        $defaultFormat = \App\Models\PrintFormat::getDefault();
+    @endphp
+    
+    @if($printFormats->count() > 0)
+    <div class="mb-2">
+        <label for="printFormat_{{ $fixedAsset->id }}" class="block text-xs text-gray-700 mb-1">Ukuran Label:</label>
+        <select id="printFormat_{{ $fixedAsset->id }}" 
+                class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            @foreach($printFormats as $format)
+                <option value="{{ $format->code }}" {{ $format->is_default ? 'selected' : '' }}>
+                    {{ $format->name }} ({{ $format->width_cm }}×{{ $format->height_cm }} cm)
+                </option>
+            @endforeach
+        </select>
+    </div>
+    @endif
+    
     <!-- Action Buttons -->
     <div class="flex justify-center space-x-1">
         <!-- Print Button -->
-        <a href="{{ route('qr.asset.print', $fixedAsset) }}?autoprint=1" 
-           target="_blank"
+        <button onclick="printQRCode({{ $fixedAsset->id }}, '{{ route('qr.asset.print', $fixedAsset) }}')"
            class="inline-flex items-center px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition"
            title="Print QR Code">
             <i class="fas fa-print mr-1"></i>
             Print
-        </a>
+        </button>
         
         <!-- Download Button -->
         <button onclick="downloadQRCode({{ json_encode(route('qr.asset.download', ['fixedAsset' => $fixedAsset, 'size' => 400, 'format' => 'svg'])) }}, {{ json_encode('qrcode_' . $fixedAsset->kode . '.svg') }})"
@@ -62,6 +81,22 @@
 
 @push('scripts')
 <script>
+function printQRCode(assetId, baseUrl) {
+    const formatSelect = document.getElementById('printFormat_' + assetId);
+    const selectedFormat = formatSelect ? formatSelect.value : '';
+    
+    // Build URL with format parameter
+    let url = baseUrl;
+    if (selectedFormat) {
+        url += '?format=' + selectedFormat + '&autoprint=1';
+    } else {
+        url += '?autoprint=1';
+    }
+    
+    // Open in new window
+    window.open(url, '_blank');
+}
+
 function downloadQRCode(url, filename) {
     try {
         // Method 1: Try fetch API for better error handling

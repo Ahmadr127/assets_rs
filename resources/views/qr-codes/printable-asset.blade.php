@@ -1,270 +1,362 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>QR Code - {{ $fixedAsset->nama_fixed_asset }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background: white; color: #000; line-height: 1.2; }
+
+        .container { max-width: 400px; margin: 20px auto; padding: 0; }
+
+        /* Label Stiker Style */
+        .label-stiker {
+            border: 2px solid #000;
+            padding: 10px;
+            background: white;
+            display: inline-block;
+            width: 100%;
+            max-width: 350px;
             box-sizing: border-box;
         }
-        
-        body {
-            font-family: 'Arial', sans-serif;
-            background: white;
-            color: #333;
-            line-height: 1.3;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 15px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-        }
-        
-        .header h1 {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
-        
-        .header p {
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .qr-section {
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        
+
+        .label-content { display: flex; align-items: stretch; gap: 10px; }
+
+        /* QR Code di Kiri (layar) */
         .qr-code {
             flex-shrink: 0;
-            text-align: center;
-            border: 2px solid #333;
-            padding: 10px;
+            border: 1px solid #000;
+            padding: 5px;
             background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
+
         .qr-code svg {
             display: block;
-            max-width: 200px;
-            max-height: 200px;
-            width: 100%;
+            width: auto;
             height: auto;
+            max-width: 100%;
+            max-height: 100%;
         }
-        
-        .asset-info {
-            flex: 1;
+
+        /* Info di Kanan */
+        .asset-info { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            padding: 5px 0;
+            min-width: 0;
+            overflow: hidden;
         }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        
-        .info-item {
-            border-bottom: 1px solid #eee;
-            padding-bottom: 4px;
-        }
-        
-        .info-label {
-            font-size: 10px;
-            color: #666;
-            text-transform: uppercase;
+        .logo-section { text-align: center; margin-bottom: 8px; overflow: hidden; max-height: 30px; }
+        .logo-section img { max-width: 100%; height: auto; max-height: 30px; object-fit: contain; }
+        .nama-barang {
+            font-size: {{ $printFormat->font_size_name }}px;
             font-weight: bold;
-            margin-bottom: 2px;
-        }
-        
-        .info-value {
-            font-size: 11px;
-            font-weight: 500;
-        }
-        
-        .url-section {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 3px;
-            padding: 10px;
-            margin-bottom: 12px;
-        }
-        
-        .url-label {
-            font-size: 10px;
-            color: #666;
-            margin-bottom: 3px;
-            font-weight: bold;
-        }
-        
-        .url-value {
-            font-size: 10px;
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-            background: white;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 2px;
-        }
-        
-        .footer {
             text-align: center;
-            font-size: 9px;
-            color: #666;
-            border-top: 1px solid #eee;
-            padding-top: 8px;
+            margin-bottom: 8px;
+            line-height: 1.2;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
-        
-        .instructions {
-            background: #e3f2fd;
-            border-left: 3px solid #2196f3;
-            padding: 10px;
-            margin-bottom: 12px;
+        .kode-manual {
+            font-size: {{ $printFormat->font_size_code }}px;
+            font-weight: bold;
+            text-align: center;
+            padding: 3px 5px;
+            border: 1px solid #000;
+            background: white;
+            font-family: 'Courier New', monospace;
         }
-        
-        .instructions h3 {
-            font-size: 12px;
-            margin-bottom: 5px;
-            color: #1976d2;
-        }
-        
-        .instructions p {
-            font-size: 10px;
-            color: #333;
-        }
-        
-        /* Print styles */
+
+        .instructions { background: #e3f2fd; border-left: 3px solid #2196f3; padding: 10px; margin-bottom: 15px; }
+        .instructions h3 { font-size: 12px; margin-bottom: 5px; color: #1976d2; }
+        .instructions p { font-size: 10px; color: #333; }
+
+        /* PRINT STYLES */
         @media print {
             @page {
-                size: A4;
-                margin: 10mm;
-            }
-            
-            body {
+                size: {{ $printFormat->getWidthMm() }}mm {{ $printFormat->getHeightMm() }}mm;
                 margin: 0;
-                padding: 0;
             }
-            
+
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            html, body {
+                width: {{ $printFormat->getWidthMm() }}mm;
+                height: {{ $printFormat->getHeightMm() }}mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden;
+            }
+
             .container {
-                max-width: none;
                 margin: 0;
                 padding: 0;
+                width: {{ $printFormat->getWidthMm() }}mm;
+                height: {{ $printFormat->getHeightMm() }}mm;
+                max-width: {{ $printFormat->getWidthMm() }}mm;
+                max-height: {{ $printFormat->getHeightMm() }}mm;
+                display: block;
+                box-sizing: border-box;
             }
-            
-            .no-print {
-                display: none !important;
+
+            .no-print { display: none !important; }
+
+            .label-stiker {
+                border: 1px solid #000;
+                width: 100%;
+                height: 100%;
+                padding: {{ $printFormat->getLabelPaddingMm() }}mm;
+                background: white;
+                display: block;
+                box-sizing: border-box;
+                page-break-inside: avoid !important;
             }
-            
-            .qr-section {
-                page-break-inside: avoid;
+
+            .label-content {
+                display: flex;
+                align-items: stretch;
+                gap: {{ $printFormat->getContentGapMm() }}mm;
+                width: 100%;
+                height: 100%;
             }
-            
-            .header {
-                margin-bottom: 10px;
-                padding-bottom: 8px;
-            }
-            
-            .qr-section {
-                margin-bottom: 10px;
-                gap: 15px;
-            }
-            
+
+            /* Kalkulasi ukuran QR dan box secara akurat (menggunakan DPI printer) */
+            @php
+                // DPI printer yang kita targetkan
+                $printerDpi = 300;
+
+                // QR size proporsional dari model
+                $qrSizeMm = $printFormat->getProportionalQrSizeMm();
+                
+                // Padding di sekitar QR
+                $qrPaddingMm = $printFormat->getProportionalMarginMm();
+
+                // Total box dimension
+                $qrBoxMm = round($qrSizeMm + ($qrPaddingMm * 2), 2);
+
+                // Gap antara QR dan text
+                $gapMm = $printFormat->getContentGapMm();
+
+                // Padding label
+                $labelPaddingMm = $printFormat->getLabelPaddingMm();
+
+                // Logo max height: adaptif berdasarkan tinggi label
+                $labelHeightMm = $printFormat->getHeightMm();
+                if ($labelHeightMm <= 20) {
+                    $logoMaxMm = 1.5; // Very small
+                } elseif ($labelHeightMm <= 30) {
+                    $logoMaxMm = 2; // Medium
+                } else {
+                    $logoMaxMm = 3; // Large
+                }
+
+                // Font sizes proporsional
+                $fontNameSize = $printFormat->getProportionalFontNameSize();
+                $fontCodeSize = $printFormat->getProportionalFontCodeSize();
+                
+                // Calculated text area width for verification
+                $textAreaWidth = $printFormat->getTextAreaWidthMm();
+            @endphp
+
             .qr-code {
-                padding: 8px;
-            }
-            
-            .qr-code svg {
-                max-width: 180px;
-                max-height: 180px;
-            }
-            
-            .info-grid {
-                gap: 5px;
-            }
-            
-            .info-item {
-                padding-bottom: 3px;
-            }
-            
-            .url-section {
-                padding: 6px;
-                margin-bottom: 8px;
-            }
-            
-            .footer {
-                padding-top: 5px;
-                font-size: 8px;
-            }
-            
-            .instructions {
-                padding: 8px;
-                margin-bottom: 8px;
-            }
-        }
-        
-        /* Mobile responsive */
-        @media (max-width: 768px) {
-            .qr-section {
-                flex-direction: column;
+                flex-shrink: 0;
+                border: 1px solid #000;
+                padding: {{ $qrPaddingMm }}mm;
+                background: white;
+                display: flex;
                 align-items: center;
+                justify-content: center;
+                width: {{ $qrBoxMm }}mm;
+                height: {{ $qrBoxMm }}mm;
+                box-sizing: border-box;
             }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
+
+            .qr-code svg {
+                width: {{ $qrSizeMm }}mm !important;
+                height: {{ $qrSizeMm }}mm !important;
+                max-width: {{ $qrSizeMm }}mm !important;
+                max-height: {{ $qrSizeMm }}mm !important;
+                display: block;
+            }
+
+            .asset-info {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                min-width: 0;
+                overflow: hidden;
+                gap: 1mm;
+            }
+
+            .logo-section {
+                text-align: center;
+                margin-bottom: 0;
+                max-height: {{ $logoMaxMm }}mm;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+
+            .logo-section img {
+                max-width: 100%;
+                max-height: {{ $logoMaxMm }}mm;
+                height: auto;
+            }
+
+            .nama-barang {
+                font-size: {{ $fontNameSize }}pt;
+                font-weight: bold;
+                text-align: center;
+                line-height: 1;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                word-break: break-word;
+                hyphens: auto;
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                min-height: 0;
+                padding: 0 0.5mm;
+            }
+
+            .kode-manual {
+                font-size: {{ $fontCodeSize }}pt;
+                font-weight: bold;
+                text-align: center;
+                padding: 0.5mm 1mm;
+                border: 1px solid #000;
+                background: white;
+                font-family: 'Courier New', monospace;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                flex-shrink: 0;
             }
         }
+
+        /* Mobile responsive for preview */
+        @media (max-width: 768px) {
+            .container { max-width: 100%; padding: 10px; }
+            .label-stiker { max-width: 100%; }
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>QR Code Asset</h1>
-            <p>{{ $fixedAsset->nama_fixed_asset }}</p>
-        </div>
-        
         <!-- Instructions -->
         <div class="instructions no-print">
-            <h3>Cara Menggunakan QR Code</h3>
-            <p>Scan QR Code ini menggunakan aplikasi kamera atau QR scanner untuk melihat detail lengkap asset secara online.</p>
+            <h3>Cara Menggunakan QR Code Label</h3>
+            <p>Scan QR Code ini menggunakan aplikasi kamera atau QR scanner untuk melihat detail lengkap asset. Klik Print untuk mencetak label.</p>
+            <p><strong>Format Print:</strong> {{ $printFormat->name }} ({{ $printFormat->width_cm }} x {{ $printFormat->height_cm }} cm)</p>
         </div>
-        
-        <!-- QR Code and Asset Info -->
-        <div class="qr-section">
-            <div class="qr-code">
-                {!! $qrCodeSvg !!}
-            </div>        
+
+        <!-- Label Stiker -->
+        <div class="label-stiker">
+            <div class="label-content">
+                <!-- QR Code di Kiri -->
+                <div class="qr-code">
+                    {!! $qrCodeSvg !!}
+                </div>
+
+                <!-- Info di Kanan -->
+                <div class="asset-info">
+                    <!-- Logo -->
+                    <div class="logo-section">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" onerror="this.style.display='none'">
+                    </div>
+
+                    <!-- Nama Barang -->
+                    <div class="nama-barang">
+                        {{ $fixedAsset->nama_fixed_asset }}
+                    </div>
+
+                    <!-- Kode Manual -->
+                    <div class="kode-manual">
+                        {{ $fixedAsset->kode_manual ?? $fixedAsset->kode ?? '-' }}
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- Footer -->
-        <div class="footer">
-            <p>
-                <strong>Asset Management System</strong><br>
-                QR Code dibuat pada: {{ $generatedAt }}<br>
-                ID Asset: #{{ $fixedAsset->id }}
-            </p>
+
+        <!-- Info Tambahan (no-print) -->
+        <div class="no-print" style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 11px;">
+            <p><strong>ID Asset:</strong> #{{ $fixedAsset->id }}</p>
+            <p><strong>Kode:</strong> {{ $fixedAsset->kode ?? '-' }}</p>
+            <p><strong>Kode Manual:</strong> {{ $fixedAsset->kode_manual ?? '-' }}</p>
+            <p><strong>Dibuat pada:</strong> {{ $generatedAt }}</p>
         </div>
     </div>
-    
+
     <script>
-        // Auto print when opened in new window
+        @php
+            // Kalkulasi ukuran QR dalam mm untuk JavaScript fallback
+            $printerDpi = 300;
+            $qrSizeMm = $printFormat->getProportionalQrSizeMm();
+        @endphp
+
+        // FALLBACK: Force SVG size sebelum print
+        // Ini memastikan browser tidak override ukuran mm yang sudah di-set
+        function enforceSvgSize() {
+            const qrSizeMm = {{ $qrSizeMm }};
+            const svgElements = document.querySelectorAll('.qr-code svg');
+            
+            svgElements.forEach(function(svg) {
+                // Set atribut width/height dalam mm
+                svg.setAttribute('width', qrSizeMm + 'mm');
+                svg.setAttribute('height', qrSizeMm + 'mm');
+                
+                // Force inline style (prioritas tertinggi)
+                svg.style.width = qrSizeMm + 'mm';
+                svg.style.height = qrSizeMm + 'mm';
+                svg.style.maxWidth = qrSizeMm + 'mm';
+                svg.style.maxHeight = qrSizeMm + 'mm';
+                svg.style.display = 'block';
+                
+                // Pastikan viewBox ada (untuk scalability)
+                if (!svg.getAttribute('viewBox')) {
+                    const width = svg.getAttribute('data-width') || 100;
+                    const height = svg.getAttribute('data-height') || 100;
+                    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+                }
+            });
+            
+            console.log('SVG size enforced:', qrSizeMm + 'mm');
+        }
+
+        // Enforce saat load
         window.addEventListener('load', function() {
+            enforceSvgSize();
+            
+            // Auto print when opened in new window (autoprint=1)
             if (window.location.search.includes('autoprint=1')) {
                 setTimeout(function() {
+                    // Enforce lagi sebelum print (untuk memastikan)
+                    enforceSvgSize();
                     window.print();
                 }, 500);
             }
         });
+
+        // Enforce sebelum print dialog (untuk manual print)
+        window.addEventListener('beforeprint', function() {
+            enforceSvgSize();
+        });
     </script>
+
 </body>
 </html>

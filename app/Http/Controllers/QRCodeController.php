@@ -128,6 +128,7 @@ class QRCodeController extends Controller
 
     /**
      * Generate printable QR code page for Fixed Asset
+     * Menggunakan template terpisah untuk setiap ukuran
      *
      * @param FixedAsset $fixedAsset
      * @param Request $request
@@ -136,22 +137,70 @@ class QRCodeController extends Controller
     public function printableAsset(FixedAsset $fixedAsset, Request $request)
     {
         $request->validate([
-            'size' => 'nullable|integer|min:200|max:400'
+            'format' => 'nullable|exists:print_formats,code'
         ]);
 
-        $size = $request->input('size', 200);
-        
         try {
+            // Get print format from request or use default
+            $formatCode = $request->input('format');
+            
+            if ($formatCode) {
+                $printFormat = \App\Models\PrintFormat::where('code', $formatCode)
+                    ->where('is_active', true)
+                    ->first();
+            }
+            
+            // Fallback to default if not found
+            if (!isset($printFormat) || !$printFormat) {
+                $printFormat = \App\Models\PrintFormat::getDefault();
+            }
+
+            // If still no format found, return error
+            if (!$printFormat) {
+                throw new \Exception('No print format available. Please run PrintFormatSeeder.');
+            }
+
+            // Generate QR code URL
             $url = route('asset.public.show', $fixedAsset);
-            $qrCodeSvg = QrCode::format('svg')
-                ->size($size)
-                ->margin(2)
+            
+            // Determine QR size based on format
+            $qrSizes = [
+                '6x5' => 295,   // 25mm at 300 DPI
+                '5x3' => 248,   // 21mm at 300 DPI
+                '5x2.5' => 260, // 22mm at 300 DPI
+                '5x2' => 213,   // 18mm at 300 DPI
+            ];
+            
+            $qrSizePx = $qrSizes[$printFormat->code] ?? 295;
+            
+            // Generate QR code SVG
+            $qrCodeSvgRaw = QrCode::format('svg')
+                ->size($qrSizePx)
+                ->margin(0)
                 ->errorCorrection('M')
                 ->generate($url);
 
-            $html = view('qr-codes.printable-asset', [
+            // PATCH SVG dengan helper
+            $qrCodeSvg = \App\Helpers\SvgHelper::fixSvgSize(
+                $qrCodeSvgRaw, 
+                $qrSizePx, 
+                300
+            );
+
+            // Determine which template to use based on format code
+            $templates = [
+                '6x5' => 'qr-codes.print-6x5',
+                '5x3' => 'qr-codes.print-5x3',
+                '5x2.5' => 'qr-codes.print-5x25', // Filename tanpa titik
+                '5x2' => 'qr-codes.print-5x2',
+            ];
+            
+            $template = $templates[$printFormat->code] ?? 'qr-codes.print-6x5';
+
+            $html = view($template, [
                 'fixedAsset' => $fixedAsset,
                 'qrCodeSvg' => $qrCodeSvg,
+                'printFormat' => $printFormat,
                 'url' => $url,
                 'generatedAt' => now()->format('d/m/Y H:i')
             ])->render();
@@ -163,11 +212,12 @@ class QRCodeController extends Controller
         } catch (\Exception $e) {
             Log::error('Printable QR Code generation failed', [
                 'asset_id' => $fixedAsset->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
-                'error' => 'Failed to generate printable QR code'
+                'error' => 'Failed to generate printable QR code: ' . $e->getMessage()
             ], 500);
         }
     }

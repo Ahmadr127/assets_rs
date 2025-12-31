@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Assets RS')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @vite('resources/css/app.css')
+    <!-- @vite('resources/css/app.css') -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/x-icon" href="images/logo.png">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -56,9 +57,19 @@
                     {{-- Fixed Assets Menu --}}
                     @if(auth()->check() && auth()->user()->hasPermission('menu_fixed_assets'))
                     <li>
-                        <a href="{{ route('fixed-assets.index') }}" class="flex items-center px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('fixed-assets.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Fixed Assets">
+                        <a href="{{ route('fixed-assets.index') }}" class="flex items-center px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('fixed-assets.*') && !request()->routeIs('imports.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Fixed Assets">
                             <i class="fas fa-building w-5" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
                             <span x-show="!sidebarCollapsed">Fixed Assets</span>
+                        </a>
+                    </li>
+                    @endif
+
+                    {{-- Import Data Menu --}}
+                    @if(auth()->check() && auth()->user()->hasPermission('menu_import_data'))
+                    <li>
+                        <a href="{{ route('imports.index') }}" class="flex items-center px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('imports.*') ? 'bg-green-800' : '' }}" :class="sidebarCollapsed ? 'justify-center' : ''" title="Import Data">
+                            <i class="fas fa-file-import w-5" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+                            <span x-show="!sidebarCollapsed">Import Data</span>
                         </a>
                     </li>
                     @endif

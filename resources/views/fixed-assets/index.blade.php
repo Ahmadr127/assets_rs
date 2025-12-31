@@ -18,42 +18,78 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white p-2 border border-gray-200 shadow rounded mb-3">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-2">
-            <!-- Search -->
-            <div class="md:col-span-2">
-                <input type="text" id="search" name="search" value="{{ request('search') }}"
-                       class="block w-full px-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                       placeholder="Cari nama, kode, lokasi, PIC..." onkeyup="debounceSearch(this.value)">
+    <div class="bg-white p-3 border border-gray-200 shadow rounded mb-3">
+        <!-- Row 1: Nama + Kode + Location + Type -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2">
+            <!-- Nama Asset Filter -->
+            <div>
+                <x-filter-dropdown 
+                    name="nama_fixed_asset" 
+                    label="Semua Nama Asset" 
+                    :options="$namaOptions" 
+                    :value="request('nama_fixed_asset')" 
+                />
             </div>
+            <!-- Kode Filter -->
+            <div>
+                <x-filter-dropdown 
+                    name="kode" 
+                    label="Semua Kode" 
+                    :options="$kodeOptions" 
+                    :value="request('kode')" 
+                />
+            </div>
+            <!-- Location Filter -->
+            <div>
+                <x-filter-dropdown 
+                    name="location_id" 
+                    label="Semua Lokasi" 
+                    :options="$locations" 
+                    :value="request('location_id')" 
+                />
+            </div>
+            <!-- Type Filter -->
+            <div>
+                <x-filter-dropdown 
+                    name="asset_type_id" 
+                    label="Semua Tipe" 
+                    :options="$types" 
+                    :value="request('asset_type_id')" 
+                />
+            </div>
+        </div>
+        <!-- Row 2: Status + Kondisi + PIC Search + Reset -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <!-- Status Filter -->
             <div>
-                <select id="status" name="status_id" 
-                        class="block w-full px-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                        onchange="applyStatusFilter()">
-                    <option value="">Semua Status</option>
-                    @foreach($statuses as $id => $name)
-                        <option value="{{ $id }}" {{ request('status_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
-                    @endforeach
-                </select>
+                <x-filter-dropdown 
+                    name="status_id" 
+                    label="Semua Status" 
+                    :options="$statuses" 
+                    :value="request('status_id')" 
+                />
             </div>
             <!-- Condition Filter -->
             <div>
-                <select id="kondisi" name="condition_id" 
-                        class="block w-full px-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                        onchange="applyConditionFilter()">
-                    <option value="">Semua Kondisi</option>
-                    @foreach($conditions as $id => $name)
-                        <option value="{{ $id }}" {{ request('condition_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
-                    @endforeach
-                </select>
+                <x-filter-dropdown 
+                    name="condition_id" 
+                    label="Semua Kondisi" 
+                    :options="$conditions" 
+                    :value="request('condition_id')" 
+                />
             </div>
-            <!-- Actions -->
+            <!-- PIC Search -->
+            <div>
+                <input type="text" id="search" name="search" value="{{ request('search') }}"
+                       class="block w-full px-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                       placeholder="Cari PIC..." onkeyup="debounceSearch(this.value)">
+            </div>
+            <!-- Reset Button -->
             <div>
                 <button type="button" onclick="clearAllFilters()" 
-                        class="w-full inline-flex items-center justify-center px-2 py-1.5 border border-gray-300 rounded text-xs text-gray-700 bg-white hover:bg-gray-50 transition">
+                        class="w-full inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 rounded text-xs text-gray-700 bg-white hover:bg-gray-50 transition">
                     <i class="fas fa-times mr-1"></i>
-                    Reset
+                    Reset Filter
                 </button>
             </div>
         </div>
@@ -73,6 +109,7 @@
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kondisi</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">PIC</th>
+                        <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nilai Awal</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Efektif Mulai</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Taksiran Umur (thn)</th>
                         <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
@@ -122,6 +159,13 @@
                         </td>
                         <td class="px-2 py-2 text-xs text-gray-900">{{ Str::limit($asset->pic, 20) }}</td>
                         <td class="px-2 py-2 text-xs text-gray-900">
+                            @if($asset->nilai_awal)
+                                Rp {{ number_format($asset->nilai_awal, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td class="px-2 py-2 text-xs text-gray-900">
                             @if($asset->efektif_mulai)
                                 {{ $asset->efektif_mulai->format('d/m/Y') }}
                             @else
@@ -154,7 +198,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="11" class="px-2 py-6 text-center text-xs text-gray-500">
+                        <td colspan="12" class="px-2 py-6 text-center text-xs text-gray-500">
                             <i class="fas fa-inbox text-2xl text-gray-300 mb-1"></i>
                             <div>Tidak ada data</div>
                         </td>
@@ -184,30 +228,9 @@ function debounceSearch(value) {
         } else {
             url.searchParams.delete('search');
         }
+        url.searchParams.delete('page');
         window.location.href = url.toString();
     }, 500);
-}
-
-function applyStatusFilter() {
-    const status = document.getElementById('status').value;
-    const url = new URL(window.location);
-    if (status) {
-        url.searchParams.set('status_id', status);
-    } else {
-        url.searchParams.delete('status_id');
-    }
-    window.location.href = url.toString();
-}
-
-function applyConditionFilter() {
-    const kondisi = document.getElementById('kondisi').value;
-    const url = new URL(window.location);
-    if (kondisi) {
-        url.searchParams.set('condition_id', kondisi);
-    } else {
-        url.searchParams.delete('condition_id');
-    }
-    window.location.href = url.toString();
 }
 
 function clearAllFilters() {
