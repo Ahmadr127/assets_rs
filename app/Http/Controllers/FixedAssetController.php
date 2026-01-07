@@ -66,9 +66,9 @@ class FixedAssetController extends Controller
             $query->where('nama_fixed_asset', $request->nama_fixed_asset);
         }
 
-        // Kode filter
+        // Kode filter (using kode_manual)
         if ($request->filled('kode')) {
-            $query->where('kode', $request->kode);
+            $query->where('kode_manual', $request->kode);
         }
 
         // Search functionality (PIC only now)
@@ -118,11 +118,11 @@ class FixedAssetController extends Controller
             ->orderBy('nama_fixed_asset')
             ->pluck('nama_fixed_asset', 'nama_fixed_asset');
         
-        $kodeOptions = FixedAsset::whereNotNull('kode')
-            ->where('kode', '!=', '')
+        $kodeOptions = FixedAsset::whereNotNull('kode_manual')
+            ->where('kode_manual', '!=', '')
             ->distinct()
-            ->orderBy('kode')
-            ->pluck('kode', 'kode');
+            ->orderBy('kode_manual')
+            ->pluck('kode_manual', 'kode_manual');
 
         // Master data for filters
         $locations = Location::orderBy('name')->pluck('name','id');
