@@ -118,7 +118,7 @@
                     <input type="date" 
                            id="efektif_mulai" 
                            name="efektif_mulai" 
-                           value="{{ old('efektif_mulai', $fixedAsset->efektif_mulai->format('Y-m-d')) }}"
+                           value="{{ old('efektif_mulai', $fixedAsset->efektif_mulai ? $fixedAsset->efektif_mulai->format('Y-m-d') : '') }}"
                            required
                            class="block w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 @error('efektif_mulai') border-red-300 @enderror">
                     @error('efektif_mulai')<p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>@enderror

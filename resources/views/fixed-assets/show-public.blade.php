@@ -53,7 +53,13 @@
 
                             <div class="flex items-start py-1.5 border-b border-gray-100">
                                 <label class="text-xs font-semibold text-gray-500 uppercase w-28 flex-shrink-0">Efektif Mulai</label>
-                                <p class="text-sm text-gray-900 flex-1">{{ $fixedAsset->efektif_mulai->format('d F Y') }}</p>
+                                <p class="text-sm text-gray-900 flex-1">
+                                    @if($fixedAsset->efektif_mulai)
+                                        {{ $fixedAsset->efektif_mulai->format('d F Y') }}
+                                    @else
+                                        -
+                                    @endif
+                                </p>
                             </div>
                         </div>
 
