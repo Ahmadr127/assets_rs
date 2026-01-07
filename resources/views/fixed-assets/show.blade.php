@@ -62,7 +62,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div class="flex items-start py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0 pt-1">Nama Asset</dt>
-                        <dd class="text-sm text-gray-900 font-medium">{{ $fixedAsset->nama_fixed_asset }}</dd>
+                        <dd class="text-sm text-gray-900 font-medium">{{ $fixedAsset->nama_fixed_asset ?: '-' }}</dd>
                     </div>
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Lokasi</dt>
@@ -111,7 +111,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Taksiran Umur</dt>
-                        <dd class="text-sm text-gray-900">{{ $fixedAsset->taksiran_umur }} tahun</dd>
+                        <dd class="text-sm text-gray-900">{{ $fixedAsset->taksiran_umur ? $fixedAsset->taksiran_umur . ' tahun' : '-' }}</dd>
                     </div>
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Nilai Awal</dt>
@@ -128,18 +128,24 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Efektif Mulai</dt>
-                        <dd class="text-sm text-gray-900">{{ $fixedAsset->efektif_mulai->format('d F Y') }}</dd>
+                        <dd class="text-sm text-gray-900">
+                            @if($fixedAsset->efektif_mulai)
+                                {{ $fixedAsset->efektif_mulai->format('d F Y') }}
+                            @else
+                                -
+                            @endif
+                        </dd>
                     </div>
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Umur Aset</dt>
-                        <dd class="text-sm text-gray-900">{{ $fixedAsset->age_display }}</dd>
+                        <dd class="text-sm text-gray-900">{{ $fixedAsset->age_display ?: '-' }}</dd>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">PIC</dt>
-                        <dd class="text-sm text-gray-900">{{ $fixedAsset->pic }}</dd>
+                        <dd class="text-sm text-gray-900">{{ $fixedAsset->pic ?: '-' }}</dd>
                     </div>
                     <div class="flex items-center py-1.5 border-b border-gray-100">
                         <dt class="text-sm font-medium text-gray-600 w-32 flex-shrink-0">Cek Fisik</dt>
