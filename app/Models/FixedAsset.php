@@ -120,20 +120,31 @@ class FixedAsset extends Model
             return '-';
         }
 
-        $years = $this->efektif_mulai->diffInYears(now());
+        $years = (int) $this->efektif_mulai->diffInYears(now());
         
         if ($years >= 1) {
             return $years . ' thn';
         }
         
-        $months = $this->efektif_mulai->diffInMonths(now());
+        $months = (int) $this->efektif_mulai->diffInMonths(now());
         if ($months >= 1) {
             return $months . ' bln';
         }
         
-        $days = $this->efektif_mulai->diffInDays(now());
+        $days = (int) $this->efektif_mulai->diffInDays(now());
         return $days . ' hari';
     }
+    
+    // Accessor for taksiran_umur to ensure it's always integer
+    public function getTaksiranUmurAttribute($value)
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        // Force to integer, even if stored as decimal in old data
+        return (int) round((float) $value);
+    }
+
 
     // Scope for active assets
     public function scopeActive($query)
