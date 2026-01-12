@@ -61,22 +61,44 @@ class ProcessExcelImport implements ShouldQueue
                 'duplicates' => count($validatedData['duplicates'])
             ]);
             
-            // Save validation results
-            $batchService->saveValidationResults($this->batch, $validatedData);
+            // Prepare data to process based on action
+            $dataToProcess = [];
+            $dataToLog = [];
             
-            // Process valid data
-            if (!empty($validatedData['valid'])) {
+            if ($this->action === 'update') {
+                // For update action: process both valid and duplicates
+                $dataToProcess = array_merge($validatedData['valid'], $validatedData['duplicates']);
+                // Only log errors and valid (non-duplicate) data initially
+                // Duplicates will be logged as 'updated' after processing
+                $dataToLog = [
+                    'valid' => $validatedData['valid'],
+                    'errors' => $validatedData['errors'],
+                    'duplicates' => [] // Don't log duplicates yet, will be logged as 'updated'
+                ];
+                Log::info("Action is update, will process " . count($dataToProcess) . " rows (valid + duplicates)");
+            } else {
+                // For create action: only process valid data
+                $dataToProcess = $validatedData['valid'];
+                // Log all validation results
+                $dataToLog = $validatedData;
+            }
+            
+            // Save validation results (excluding duplicates if action is update)
+            $batchService->saveValidationResults($this->batch, $dataToLog);
+            
+            // Process data
+            if (!empty($dataToProcess)) {
                 $result = $importService->processImport(
                     $this->batch,
-                    $validatedData['valid'],
+                    $dataToProcess,
                     $this->action
                 );
                 
                 Log::info("Import completed for batch {$this->batch->id}", $result);
             } else {
-                // No valid data to import
+                // No data to import
                 $batchService->updateBatchStatus($this->batch, 'completed', [
-                    'message' => 'No valid data to import',
+                    'message' => 'No data to import',
                     'errors' => count($validatedData['errors']),
                     'duplicates' => count($validatedData['duplicates']),
                 ]);

@@ -202,6 +202,10 @@
                 width: 100%;
                 box-sizing: border-box;
             }
+            
+            /* Auto-scaling untuk asset number panjang */
+            .kode-manual.medium { font-size: 4.5pt; }
+            .kode-manual.long { font-size: 3.5pt; line-height: 1.1; white-space: normal; word-break: break-all; }
         }
     </style>
 </head>
@@ -231,8 +235,13 @@
                         {{ $fixedAsset->nama_fixed_asset }}
                     </div>
 
-                    <div class="kode-manual">
-                        {{ $fixedAsset->kode_manual ?? $fixedAsset->kode ?? '-' }}
+                    @php
+                        $assetNumber = $fixedAsset->asset_number ?? '-';
+                        $length = strlen($assetNumber);
+                        $sizeClass = $length > 25 ? 'long' : ($length > 15 ? 'medium' : '');
+                    @endphp
+                    <div class="kode-manual {{ $sizeClass }}">
+                        {{ $assetNumber }}
                     </div>
                 </div>
 

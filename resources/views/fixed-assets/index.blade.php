@@ -78,11 +78,14 @@
                     :value="request('condition_id')" 
                 />
             </div>
-            <!-- PIC Search -->
+            <!-- Asset Number Filter -->
             <div>
-                <input type="text" id="search" name="search" value="{{ request('search') }}"
-                       class="block w-full px-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                       placeholder="Cari PIC..." onkeyup="debounceSearch(this.value)">
+                <x-filter-dropdown 
+                    name="asset_number" 
+                    label="Semua Asset Number" 
+                    :options="$assetNumberOptions" 
+                    :value="request('asset_number')" 
+                />
             </div>
             <!-- Reset Button -->
             <div>
@@ -218,21 +221,6 @@
 </div>
 
 <script>
-let searchTimeout;
-function debounceSearch(value) {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        const url = new URL(window.location);
-        if (value) {
-            url.searchParams.set('search', value);
-        } else {
-            url.searchParams.delete('search');
-        }
-        url.searchParams.delete('page');
-        window.location.href = url.toString();
-    }, 500);
-}
-
 function clearAllFilters() {
     const url = new URL(window.location);
     url.search = '';

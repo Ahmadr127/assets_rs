@@ -202,9 +202,16 @@ class ExcelImportService
             return date('Y-m-d', strtotime($value));
         }
         
-        // Numeric fields
+        // Numeric fields - taksiran_umur (years)
         if (in_array($field, ['taksiran_umur'])) {
-            return is_numeric($value) ? abs((int)$value) : null;
+            if (!is_numeric($value)) {
+                return null;
+            }
+            // Round first to avoid decimal issues, then convert to int
+            $numericValue = floatval($value);
+            // Ensure positive value and reasonable range (1-100 years)
+            $rounded = round(abs($numericValue));
+            return ($rounded >= 1 && $rounded <= 100) ? (int)$rounded : null;
         }
         
         // Nilai awal - handle negative values
@@ -306,45 +313,72 @@ class ExcelImportService
             try {
                 $mappedData = $item['mapped_data'];
                 
-                // Auto-generate kode if not provided
-                if (empty($mappedData['kode'])) {
-                    $mappedData['kode'] = $this->generateUniqueKode();
-                }
-                
-                // Auto-generate kode_manual if not provided (must be unique)
-                if (empty($mappedData['kode_manual'])) {
-                    $mappedData['kode_manual'] = $this->generateUniqueKodeManual();
-                }
-                
-                // Resolve foreign keys and set defaults
-                $resolvedData = $this->filterService->resolveForeignKeys($mappedData);
+                // Check if this is an update action and item has existing_record_id
+                $isUpdate = false;
+                $existingAsset = null;
                 
                 if ($action === 'update' && isset($item['existing_record_id'])) {
-                    // Update existing record
-                    $asset = FixedAsset::find($item['existing_record_id']);
-                    if ($asset) {
-                        $asset->update($resolvedData);
-                        $updatedCount++;
-                        $status = 'updated';
-                    } else {
-                        throw new Exception("Record not found");
+                    $existingAsset = FixedAsset::find($item['existing_record_id']);
+                    $isUpdate = true;
+                } elseif ($action === 'update') {
+                    // If action is update but no existing_record_id, check for duplicate
+                    $duplicateCheck = $this->filterService->checkDuplicate($mappedData);
+                    if ($duplicateCheck['is_duplicate']) {
+                        $existingAsset = FixedAsset::find($duplicateCheck['existing_id']);
+                        $isUpdate = true;
                     }
+                }
+                
+                if ($isUpdate && $existingAsset) {
+                    // Update existing record
+                    // Preserve kode and kode_manual from existing record
+                    $mappedData['kode'] = $existingAsset->kode;
+                    $mappedData['kode_manual'] = $existingAsset->kode_manual;
+                    
+                    // Resolve foreign keys and set defaults
+                    $resolvedData = $this->filterService->resolveForeignKeys($mappedData);
+                    
+                    $existingAsset->update($resolvedData);
+                    $updatedCount++;
+                    $status = 'updated';
+                    $asset = $existingAsset;
                 } else {
                     // Create new record
+                    // Auto-generate kode if not provided
+                    if (empty($mappedData['kode'])) {
+                        $mappedData['kode'] = $this->generateUniqueKode();
+                    }
+                    
+                    // Auto-generate kode_manual if not provided (must be unique)
+                    if (empty($mappedData['kode_manual'])) {
+                        $mappedData['kode_manual'] = $this->generateUniqueKodeManual();
+                    }
+                    
+                    // Resolve foreign keys and set defaults
+                    $resolvedData = $this->filterService->resolveForeignKeys($mappedData);
+                    
                     $asset = FixedAsset::create($resolvedData);
                     $successCount++;
                     $status = 'imported';
                 }
                 
                 // Log success
-                ImportLog::create([
+                $logData = [
                     'import_batch_id' => $batch->id,
                     'row_index' => $item['row_index'],
                     'row_data' => $item['row_data'],
-                    'mapped_data' => $resolvedData,
+                    'mapped_data' => $resolvedData ?? $mappedData,
                     'status' => $status,
                     'processed_at' => now(),
-                ]);
+                ];
+                
+                // Add duplicate info if this was an update
+                if ($status === 'updated' && $existingAsset) {
+                    $logData['existing_record_id'] = $existingAsset->id;
+                    $logData['duplicate_key'] = $item['duplicate_key'] ?? 'auto-detected';
+                }
+                
+                ImportLog::create($logData);
                 
                 DB::commit();
                 
@@ -363,6 +397,7 @@ class ExcelImportService
                         'total' => $totalRows,
                         'progress' => $progress . '%',
                         'success' => $successCount,
+                        'updated' => $updatedCount,
                         'failed' => $failedCount
                     ]);
                 }

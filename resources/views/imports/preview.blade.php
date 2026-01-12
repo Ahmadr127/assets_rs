@@ -329,15 +329,23 @@
         
         <div class="bg-white shadow-sm rounded-lg p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Pilih Aksi Import</h3>
-            <form action="{{ route('imports.process', $batch->id) }}" method="POST">
+            <form action="{{ route('imports.process', $batch->id) }}" method="POST" x-data="{ action: 'create' }">
                 @csrf
                 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Aksi untuk Data Valid</label>
-                    <select name="action" class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <option value="create">Create - Buat data baru (skip duplicates)</option>
-                        <option value="update">Update - Update data yang duplikat</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Aksi Import</label>
+                    <select name="action" x-model="action" class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="create">Create - Buat data baru saja ({{ count($validatedData['valid']) }} data, skip {{ count($validatedData['duplicates']) }} duplikat)</option>
+                        <option value="update">Update - Buat data baru + Update duplikat ({{ count($validatedData['valid']) + count($validatedData['duplicates']) }} data total)</option>
                     </select>
+                    <p class="mt-2 text-sm text-gray-500" x-show="action === 'create'">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Hanya data valid yang akan diimport. Data duplikat akan di-skip.
+                    </p>
+                    <p class="mt-2 text-sm text-gray-500" x-show="action === 'update'">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Data valid akan dibuat baru, data duplikat akan di-update dengan data dari Excel.
+                    </p>
                 </div>
 
                 <div class="flex justify-between">
@@ -345,7 +353,8 @@
                         <i class="fas fa-arrow-left mr-2"></i>Kembali ke Mapping
                     </a>
                     <button type="submit" class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors">
-                        <i class="fas fa-check mr-2"></i>Proses Import ({{ count($validatedData['valid']) }} data)
+                        <i class="fas fa-check mr-2"></i>
+                        <span x-text="action === 'create' ? 'Proses Import ({{ count($validatedData['valid']) }} data)' : 'Proses Import ({{ count($validatedData['valid']) + count($validatedData['duplicates']) }} data)'"></span>
                     </button>
                 </div>
             </form>
