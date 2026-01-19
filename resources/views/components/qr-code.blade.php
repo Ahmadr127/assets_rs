@@ -25,8 +25,10 @@
     
     <!-- Print Format Selector -->
     @php
-        $printFormats = \App\Models\PrintFormat::getActive();
-        $defaultFormat = \App\Models\PrintFormat::getDefault();
+        // Hardcode urutan dari kecil ke besar berdasarkan height_cm
+        $printFormats = \App\Models\PrintFormat::getActive()->sortBy('height_cm');
+        // Hardcode default ke Stiker Mini (5x2)
+        $defaultCode = '5x2';
     @endphp
     
     @if($printFormats->count() > 0)
@@ -35,7 +37,7 @@
         <select id="printFormat_{{ $fixedAsset->id }}" 
                 class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
             @foreach($printFormats as $format)
-                <option value="{{ $format->code }}" {{ $format->is_default ? 'selected' : '' }}>
+                <option value="{{ $format->code }}" {{ $format->code === $defaultCode ? 'selected' : '' }}>
                     {{ $format->name }} ({{ $format->width_cm }}×{{ $format->height_cm }} cm)
                 </option>
             @endforeach
