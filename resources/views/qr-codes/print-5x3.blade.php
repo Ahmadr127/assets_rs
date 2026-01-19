@@ -34,8 +34,9 @@
             
             .label-stiker {
                 border: 1px solid #000;
-                width: 50mm;
-                height: 30mm;
+                width: 48mm;
+                height: 28mm;
+                margin: 1mm;
                 padding: 1.5mm;
                 background: white;
                 display: block;
@@ -55,8 +56,8 @@
                 flex-shrink: 0;
                 border: 1px solid #000;
                 padding: 0.5mm;
-                width: 22mm;
-                height: 22mm;
+                width: 24mm;
+                height: 24mm;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -64,10 +65,10 @@
             }
             
             .qr-code svg {
-                width: 21mm !important;
-                height: 21mm !important;
-                max-width: 21mm !important;
-                max-height: 21mm !important;
+                width: 23mm !important;
+                height: 23mm !important;
+                max-width: 23mm !important;
+                max-height: 23mm !important;
                 display: block;
             }
             
@@ -79,7 +80,7 @@
                 justify-content: center;
                 gap: 0.3mm;
                 overflow: hidden;
-                height: 22mm;
+                height: 24mm;
             }
             
             /* Logo - LEBIH BESAR */
@@ -117,7 +118,7 @@
             }
             
             .kode-manual {
-                font-size: 7pt;
+                font-size: 8.5pt;
                 font-weight: bold;
                 text-align: center;
                 padding: 0.4mm 0.5mm;
@@ -132,8 +133,8 @@
             }
             
             /* Auto-scaling untuk asset number panjang */
-            .kode-manual.medium { font-size: 5.5pt; }
-            .kode-manual.long { font-size: 4.5pt; line-height: 1.1; white-space: normal; word-break: break-all; }
+            .kode-manual.medium { font-size: 7pt; }
+            .kode-manual.long { font-size: 6pt; line-height: 1.1; white-space: normal; word-break: break-all; }
         }
     </style>
 </head>

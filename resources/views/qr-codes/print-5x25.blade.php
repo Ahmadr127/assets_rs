@@ -34,8 +34,9 @@
             
             .label-stiker {
                 border: 1px solid #000;
-                width: 50mm;
-                height: 25mm;
+                width: 48mm;
+                height: 23mm;
+                margin: 1mm;
                 padding: 1mm;
                 background: white;
                 display: block;
@@ -55,8 +56,8 @@
                 flex-shrink: 0;
                 border: 1px solid #000;
                 padding: 0.5mm;
-                width: 23mm;
-                height: 23mm;
+                width: 20mm;
+                height: 20mm;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -64,10 +65,10 @@
             }
             
             .qr-code svg {
-                width: 22mm !important;
-                height: 22mm !important;
-                max-width: 22mm !important;
-                max-height: 22mm !important;
+                width: 19mm !important;
+                height: 19mm !important;
+                max-width: 19mm !important;
+                max-height: 19mm !important;
                 display: block;
             }
             
@@ -79,13 +80,13 @@
                 justify-content: center;
                 gap: 0.3mm;
                 overflow: hidden;
-                height: 23mm;
+                height: 20mm;
             }
             
             /* Logo - LEBIH BESAR */
             .logo-section {
                 text-align: center;
-                max-height: 4.5mm;
+                max-height: 4mm;
                 overflow: hidden;
                 flex-shrink: 0;
                 width: 100%;
@@ -96,7 +97,7 @@
             
             .logo-section img {
                 max-width: 100%;
-                max-height: 4.5mm;
+                max-height: 4mm;
                 height: auto;
                 display: block;
             }
@@ -117,7 +118,7 @@
             }
             
             .kode-manual {
-                font-size: 6pt;
+                font-size: 7.5pt;
                 font-weight: bold;
                 text-align: center;
                 padding: 0.4mm 0.5mm;
@@ -132,8 +133,8 @@
             }
             
             /* Auto-scaling untuk asset number panjang */
-            .kode-manual.medium { font-size: 5pt; }
-            .kode-manual.long { font-size: 4pt; line-height: 1.1; white-space: normal; word-break: break-all; }
+            .kode-manual.medium { font-size: 6.5pt; }
+            .kode-manual.long { font-size: 5.5pt; line-height: 1.1; white-space: normal; word-break: break-all; }
         }
     </style>
 </head>

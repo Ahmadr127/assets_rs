@@ -111,8 +111,9 @@
             .no-print { display: none !important; }
 
             .label-stiker {
-                width: 50mm;
-                height: 20mm;
+                width: 48mm;
+                height: 18mm;
+                margin: 1mm;
                 padding: 0.5mm;
                 border: 1px solid #000;
                 display: block;
@@ -126,10 +127,10 @@
                 height: 100%;
             }
 
-            /* QR 18mm (SQUARE PERFECT) */
+            /* QR 16mm (SQUARE PERFECT) */
             .qr-code {
-                width: 19mm;
-                height: 19mm;
+                width: 16mm;
+                height: 16mm;
                 padding: 0.5mm;
                 display: flex;
                 align-items: center;
@@ -140,10 +141,10 @@
             }
 
             .qr-code svg {
-                width: 18mm !important;
-                height: 18mm !important;
-                max-width: 18mm !important;
-                max-height: 18mm !important;
+                width: 15mm !important;
+                height: 15mm !important;
+                max-width: 15mm !important;
+                max-height: 15mm !important;
             }
 
             .asset-info {
@@ -154,11 +155,11 @@
                 justify-content: center;
                 gap: 0.2mm;
                 overflow: hidden;
-                height: 19mm;
+                height: 16mm;
             }
 
             .logo-section {
-                max-height: 3.5mm;
+                max-height: 3mm;
                 flex-shrink: 0;
                 width: 100%;
                 display: flex;
@@ -168,7 +169,7 @@
 
             .logo-section img {
                 max-width: 100%;
-                max-height: 3.5mm;
+                max-height: 3mm;
                 height: auto;
                 display: block;
             }
@@ -189,7 +190,7 @@
             }
 
             .kode-manual {
-                font-size: 5.5pt;
+                font-size: 7pt;
                 font-weight: bold;
                 text-align: center;
                 padding: 0.3mm 0.5mm;
@@ -204,8 +205,8 @@
             }
             
             /* Auto-scaling untuk asset number panjang */
-            .kode-manual.medium { font-size: 4.5pt; }
-            .kode-manual.long { font-size: 3.5pt; line-height: 1.1; white-space: normal; word-break: break-all; }
+            .kode-manual.medium { font-size: 6pt; }
+            .kode-manual.long { font-size: 5pt; line-height: 1.1; white-space: normal; word-break: break-all; }
         }
     </style>
 </head>
