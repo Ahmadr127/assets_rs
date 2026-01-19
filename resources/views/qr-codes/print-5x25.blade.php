@@ -118,7 +118,7 @@
             }
             
             .kode-manual {
-                font-size: 7.5pt;
+                font-size: 9pt;
                 font-weight: bold;
                 text-align: center;
                 padding: 0.4mm 0.5mm;
@@ -133,8 +133,8 @@
             }
             
             /* Auto-scaling untuk asset number panjang */
-            .kode-manual.medium { font-size: 6.5pt; }
-            .kode-manual.long { font-size: 5.5pt; line-height: 1.1; white-space: normal; word-break: break-all; }
+            .kode-manual.medium { font-size: 7.5pt; }
+            .kode-manual.long { font-size: 6.5pt; line-height: 1.1; white-space: normal; word-break: break-all; }
         }
     </style>
 </head>
