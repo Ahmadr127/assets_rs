@@ -58,15 +58,7 @@ class QRCodeController extends Controller
                     ->roundBlockSizeMode(RoundBlockSizeMode::Margin);
 
                 if ($format === 'png') {
-                    $logoPath = public_path('images/logo.png');
-                    if (file_exists($logoPath)) {
-                        // Create a bordered version of the logo
-                        $borderedLogoPath = $this->getBorderedLogoPath($logoPath);
-                        
-                        $builder->logoPath($borderedLogoPath)
-                                ->logoResizeToWidth((int)($size * 0.3))
-                                ->logoPunchoutBackground(true);
-                    }
+                    // Logo removal requested
                 }
 
                 $result = $builder->build();
@@ -126,15 +118,7 @@ class QRCodeController extends Controller
                 ->roundBlockSizeMode(RoundBlockSizeMode::Margin);
 
             if ($format === 'png') {
-                $logoPath = public_path('images/logo.png');
-                if (file_exists($logoPath)) {
-                    // Create a bordered version of the logo
-                    $borderedLogoPath = $this->getBorderedLogoPath($logoPath);
-
-                    $builder->logoPath($borderedLogoPath)
-                            ->logoResizeToWidth((int)($size * 0.3))
-                            ->logoPunchoutBackground(true);
-                }
+                // Logo removal requested
             }
 
             $qrCodeResult = $builder->build();
@@ -159,48 +143,7 @@ class QRCodeController extends Controller
         }
     }
 
-    /**
-     * Helper to create a temporary logo with white border
-     */
-    private function getBorderedLogoPath($originalPath)
-    {
-        $hash = md5_file($originalPath);
-        $filename = 'logo_bordered_' . $hash . '.png';
-        // Use standard temp directory to avoid permission issues in storage/app
-        $tempDir = sys_get_temp_dir(); 
-        $tempPath = $tempDir . DIRECTORY_SEPARATOR . $filename;
 
-        if (!file_exists($tempPath)) {
-            $source = imagecreatefromstring(file_get_contents($originalPath));
-            if (!$source) return $originalPath; // Fallback
-
-            $w = imagesx($source);
-            $h = imagesy($source);
-            
-            // Add 15% padding on each side
-            $padding = (int)($w * 0.15); 
-            $newW = $w + ($padding * 2);
-            $newH = $h + ($padding * 2);
-            
-            $dest = imagecreatetruecolor($newW, $newH);
-            
-            // Fill with white
-            $white = imagecolorallocate($dest, 255, 255, 255);
-            imagefill($dest, 0, 0, $white);
-            
-            // Copy original logo to center
-            // This handles transparency by blending it onto the white background
-            imagealphablending($dest, true);
-            imagecopy($dest, $source, $padding, $padding, 0, 0, $w, $h);
-            
-            imagepng($dest, $tempPath);
-            
-            imagedestroy($source);
-            imagedestroy($dest);
-        }
-        
-        return $tempPath;
-    }
 
     /**
      * Generate printable QR code page for Fixed Asset
@@ -260,15 +203,7 @@ class QRCodeController extends Controller
                 ->margin(0) // No margin for print, handled by CSS
                 ->roundBlockSizeMode(RoundBlockSizeMode::Margin);
 
-            $logoPath = public_path('images/logo.png');
-            if (file_exists($logoPath)) {
-                // Create a bordered version of the logo
-                $borderedLogoPath = $this->getBorderedLogoPath($logoPath);
 
-                $builder->logoPath($borderedLogoPath)
-                        ->logoResizeToWidth((int)($qrSizePx * 0.3))
-                        ->logoPunchoutBackground(true);
-            }
 
             $result = $builder->build();
             $qrCodeImage = $result->getDataUri();
@@ -339,15 +274,7 @@ class QRCodeController extends Controller
                 ->roundBlockSizeMode(RoundBlockSizeMode::Margin);
 
             if ($format === 'png') {
-                $logoPath = public_path('images/logo.png');
-                if (file_exists($logoPath)) {
-                    // Create a bordered version of the logo
-                    $borderedLogoPath = $this->getBorderedLogoPath($logoPath);
-
-                    $builder->logoPath($borderedLogoPath)
-                            ->logoResizeToWidth((int)($size * 0.3))
-                            ->logoPunchoutBackground(true);
-                }
+                // Logo removal requested
             }
 
             $qrCodeResult = $builder->build();
