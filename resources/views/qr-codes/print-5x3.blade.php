@@ -23,6 +23,7 @@
         }
         
         .asset-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .company-name { font-size: 8px; font-weight: bold; text-align: center; margin-bottom: 2px; }
         .nama-barang { font-size: 9px; font-weight: bold; text-align: center; line-height: 1.2; word-wrap: break-word; flex: 1; display: flex; align-items: center; justify-content: center; }
         .kode-manual { font-size: 7px; font-weight: bold; text-align: center; padding: 2px; border: 1px solid #000; font-family: monospace; }
         
@@ -84,6 +85,17 @@
                 overflow: hidden;
                 height: 24mm;
             }
+
+            .company-name {
+                font-size: 6pt;
+                font-weight: bold;
+                text-align: center;
+                width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                flex-shrink: 0;
+            }
             
             .nama-barang {
                 font-size: 7pt;
@@ -135,6 +147,7 @@
                 </div>
                 
                 <div class="asset-info">
+                    <div class="company-name">PT. Arthasabena Putra</div>
                     <div class="nama-barang">
                         {{ $fixedAsset->nama_fixed_asset }}
                     </div>

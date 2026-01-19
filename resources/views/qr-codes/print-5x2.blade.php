@@ -49,6 +49,13 @@
             justify-content: center;
         }
 
+        .company-name {
+            font-size: 6px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1px;
+        }
+
         .nama-barang {
             font-size: 7px;
             font-weight: bold;
@@ -147,6 +154,17 @@
                 height: 16mm;
             }
 
+            .company-name {
+                font-size: 5pt;
+                font-weight: bold;
+                text-align: center;
+                width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                flex-shrink: 0;
+            }
+
             .nama-barang {
                 font-size: 6pt;
                 font-weight: bold;
@@ -201,6 +219,7 @@
 
                 <!-- DETAIL KANAN -->
                 <div class="asset-info">
+                    <div class="company-name">PT. Arthasabena Putra</div>
                     <div class="nama-barang">
                         {{ $fixedAsset->nama_fixed_asset }}
                     </div>
