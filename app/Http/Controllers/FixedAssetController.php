@@ -105,8 +105,28 @@ class FixedAssetController extends Controller
             $query->where('efektif_mulai', '<=', $request->date_to);
         }
 
-        // Order by latest first
-        $query->orderBy('created_at', 'desc');
+        // Year filter
+        if ($request->filled('year')) {
+            $query->whereYear('efektif_mulai', $request->year);
+        }
+
+        // Dynamic Sorting
+        $sort = $request->input('sort', 'newest');
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'a-z':
+                $query->orderBy('nama_fixed_asset', 'asc');
+                break;
+            case 'z-a':
+                $query->orderBy('nama_fixed_asset', 'desc');
+                break;
+            case 'newest':
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
 
         $fixedAssets = $query->paginate(15)->withQueryString();
 
@@ -129,21 +149,37 @@ class FixedAssetController extends Controller
             ->orderBy('asset_number')
             ->pluck('asset_number', 'asset_number');
 
+        // Get distinct years from efektif_mulai
+        $yearOptions = FixedAsset::whereNotNull('efektif_mulai')
+            ->selectRaw('EXTRACT(YEAR FROM efektif_mulai) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year', 'year');
+
         // Master data for filters
         $locations = Location::orderBy('name')->pluck('name','id');
         $types = AssetType::orderBy('name')->pluck('name','id');
         $statuses = AssetStatus::orderBy('name')->pluck('name','id');
         $conditions = AssetCondition::orderBy('name')->pluck('name','id');
 
+        $sortOptions = [
+            'newest' => 'Terbaru',
+            'oldest' => 'Terlama',
+            'a-z' => 'Abjad A-Z',
+            'z-a' => 'Abjad Z-A',
+        ];
+
         return view('fixed-assets.index', compact(
             'fixedAssets',
             'namaOptions',
             'kodeOptions',
             'assetNumberOptions',
+            'yearOptions',
             'locations',
             'types',
             'statuses',
-            'conditions'
+            'conditions',
+            'sortOptions'
         ));
     }
 

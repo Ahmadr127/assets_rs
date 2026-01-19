@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-3">
         <div>
-            <h1 class="text-xl font-bold text-gray-900">Fixed Assets</h1>
+            <h1 class="text-xl font-bold text-gray-900">Fixed Assets </h1>
             <p class="text-sm text-gray-600">Kelola aset tetap rumah sakit</p>
         </div>
         <a href="{{ route('fixed-assets.create') }}" 
@@ -18,9 +18,28 @@
     </div>
 
     <!-- Filters -->
+    <!-- Filters -->
     <div class="bg-white p-3 border border-gray-200 shadow rounded mb-3">
-        <!-- Row 1: Nama + Kode + Location + Type -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-2">
+            <!-- Row 1 -->
+            <!-- Sort Filter -->
+            <div>
+                <x-filter-dropdown 
+                    name="sort" 
+                    label="Urutkan" 
+                    :options="$sortOptions" 
+                    :value="request('sort', 'newest')" 
+                />
+            </div>
+            <!-- Year Filter -->
+            <div>
+                <x-filter-dropdown 
+                    name="year" 
+                    label="Semua Tahun" 
+                    :options="$yearOptions" 
+                    :value="request('year')" 
+                />
+            </div>
             <!-- Nama Asset Filter -->
             <div>
                 <x-filter-dropdown 
@@ -48,6 +67,8 @@
                     :value="request('location_id')" 
                 />
             </div>
+
+            <!-- Row 2 -->
             <!-- Type Filter -->
             <div>
                 <x-filter-dropdown 
@@ -57,9 +78,6 @@
                     :value="request('asset_type_id')" 
                 />
             </div>
-        </div>
-        <!-- Row 2: Status + Kondisi + PIC Search + Reset -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <!-- Status Filter -->
             <div>
                 <x-filter-dropdown 
@@ -90,13 +108,27 @@
             <!-- Reset Button -->
             <div>
                 <button type="button" onclick="clearAllFilters()" 
-                        class="w-full inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 rounded text-xs text-gray-700 bg-white hover:bg-gray-50 transition">
+                        class="w-full inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 rounded text-xs text-gray-700 bg-white hover:bg-gray-50 transition"
+                        style="height: 34px;">
                     <i class="fas fa-times mr-1"></i>
                     Reset Filter
                 </button>
             </div>
         </div>
     </div>
+
+    <script>
+    function updateQueryStringParameter(uri, key, value) {
+        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+        var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, '$1' + key + "=" + value + '$2');
+        }
+        else {
+            return uri + separator + key + "=" + value;
+        }
+    }
+    </script>
 
     <!-- Table -->
     <div class="bg-white shadow border border-gray-200 rounded overflow-hidden">

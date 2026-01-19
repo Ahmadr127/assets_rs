@@ -37,7 +37,7 @@
             background: white;
         }
 
-        .qr-code svg {
+        .qr-code img {
             width: 75px;
             height: 75px;
         }
@@ -46,18 +46,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .logo-section {
-            text-align: center;
-            max-height: 12px;
-            overflow: hidden;
-        }
-
-        .logo-section img {
-            max-width: 100%;
-            max-height: 12px;
+            justify-content: center;
         }
 
         .nama-barang {
@@ -140,7 +129,7 @@
                 flex-shrink: 0;
             }
 
-            .qr-code svg {
+            .qr-code img {
                 width: 15mm !important;
                 height: 15mm !important;
                 max-width: 15mm !important;
@@ -156,22 +145,6 @@
                 gap: 0.2mm;
                 overflow: hidden;
                 height: 16mm;
-            }
-
-            .logo-section {
-                max-height: 3mm;
-                flex-shrink: 0;
-                width: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .logo-section img {
-                max-width: 100%;
-                max-height: 3mm;
-                height: auto;
-                display: block;
             }
 
             .nama-barang {
@@ -223,15 +196,11 @@
 
                 <!-- QR CODE -->
                 <div class="qr-code">
-                    {!! $qrCodeSvg !!}
+                    <img src="{{ $qrCodeImage }}" alt="QR Code">
                 </div>
 
                 <!-- DETAIL KANAN -->
                 <div class="asset-info">
-                    <div class="logo-section">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" onerror="this.style.display='none'">
-                    </div>
-
                     <div class="nama-barang">
                         {{ $fixedAsset->nama_fixed_asset }}
                     </div>

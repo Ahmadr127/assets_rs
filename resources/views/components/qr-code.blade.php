@@ -1,22 +1,14 @@
 @props(['fixedAsset', 'size' => 120])
 
-@php
-    try {
-        $url = route('asset.public.show', $fixedAsset);
-        $qrCodeSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
-            ->size($size)
-            ->margin(1)
-            ->generate($url);
-    } catch (\Exception $e) {
-        $qrCodeSvg = '<div class="text-red-500 text-xs p-2">QR Code Error</div>';
-    }
-@endphp
-
 <div class="text-center">
     <!-- QR Code Display -->
     <div class="flex justify-center mb-2">
         <div class="inline-block p-1 bg-white border border-gray-200 rounded">
-            {!! $qrCodeSvg !!}
+            <img src="{{ route('qr.asset', ['fixedAsset' => $fixedAsset->id, 'format' => 'png', 'size' => $size]) }}" 
+                 alt="QR Code {{ $fixedAsset->nama_fixed_asset }}"
+                 width="{{ $size }}"
+                 height="{{ $size }}"
+                 class="max-w-full h-auto">
         </div>
     </div>
     
@@ -56,7 +48,7 @@
         </button>
         
         <!-- Download Button -->
-        <button onclick="downloadQRCode({{ json_encode(route('qr.asset.download', ['fixedAsset' => $fixedAsset, 'size' => 400, 'format' => 'svg'])) }}, {{ json_encode('qrcode_' . $fixedAsset->kode . '.svg') }})"
+        <button onclick="downloadQRCode({{ json_encode(route('qr.asset.download', ['fixedAsset' => $fixedAsset, 'size' => 400, 'format' => 'png'])) }}, {{ json_encode('qrcode_' . $fixedAsset->kode . '.png') }})"
                 class="inline-flex items-center px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition"
                 title="Download QR Code">
             <i class="fas fa-download mr-1"></i>

@@ -17,10 +17,12 @@
         .label-stiker { border: 2px solid #000; padding: 5px; background: white; max-width: 280px; }
         .label-content { display: flex; gap: 5px; align-items: stretch; }
         .qr-code { flex-shrink: 0; border: 1px solid #000; padding: 2px; background: white; display: flex; align-items: center; justify-content: center; }
-        .qr-code svg { display: block; width: 90px; height: 90px; }
-        .asset-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .logo-section { text-align: center; margin-bottom: 2px; max-height: 15px; overflow: hidden; }
-        .logo-section img { max-width: 100%; max-height: 15px; }
+        .qr-code img {
+            width: 90px;
+            height: 90px;
+        }
+        
+        .asset-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
         .nama-barang { font-size: 8px; font-weight: bold; text-align: center; line-height: 1.1; word-wrap: break-word; flex: 1; display: flex; align-items: center; justify-content: center; }
         .kode-manual { font-size: 6px; font-weight: bold; text-align: center; padding: 2px; border: 1px solid #000; font-family: monospace; }
         
@@ -64,7 +66,7 @@
                 box-sizing: border-box;
             }
             
-            .qr-code svg {
+            .qr-code img {
                 width: 19mm !important;
                 height: 19mm !important;
                 max-width: 19mm !important;
@@ -81,25 +83,6 @@
                 gap: 0.3mm;
                 overflow: hidden;
                 height: 20mm;
-            }
-            
-            /* Logo - LEBIH BESAR */
-            .logo-section {
-                text-align: center;
-                max-height: 4mm;
-                overflow: hidden;
-                flex-shrink: 0;
-                width: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .logo-section img {
-                max-width: 100%;
-                max-height: 4mm;
-                height: auto;
-                display: block;
             }
             
             .nama-barang {
@@ -148,14 +131,10 @@
         <div class="label-stiker">
             <div class="label-content">
                 <div class="qr-code">
-                    {!! $qrCodeSvg !!}
+                    <img src="{{ $qrCodeImage }}" alt="QR Code">
                 </div>
                 
                 <div class="asset-info">
-                    <div class="logo-section">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" onerror="this.style.display='none'">
-                    </div>
-                    
                     <div class="nama-barang">
                         {{ $fixedAsset->nama_fixed_asset }}
                     </div>

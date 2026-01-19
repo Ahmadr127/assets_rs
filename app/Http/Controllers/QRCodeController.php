@@ -8,9 +8,21 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\FixedAsset;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Writer\SvgWriter;
 
 class QRCodeController extends Controller
 {
+    /**
+     * Generate QR code for a given URL
+     *
+     * @param Request $request
+     * @return Response
+     */
     /**
      * Generate QR code for a given URL
      *
@@ -27,33 +39,45 @@ class QRCodeController extends Controller
         ]);
 
         $url = $request->input('url');
-        $size = $request->input('size', 200);
+        $size = (int) $request->input('size', 200);
         $format = $request->input('format', 'png');
-        $margin = $request->input('margin', 2);
+        $margin = (int) $request->input('margin', 2);
 
         try {
-            // Create cache key based on parameters
-            $cacheKey = 'qrcode_' . md5($url . $size . $format . $margin);
+            $cacheKey = 'qrcode_' . md5($url . $size . $format . $margin . 'v6');
             
-            // Cache QR code for 1 hour
-            $qrCode = Cache::remember($cacheKey, 3600, function () use ($url, $size, $format, $margin) {
-                if ($format === 'svg') {
-                    return QrCode::format('svg')
-                        ->size($size)
-                        ->margin($margin)
-                        ->generate($url);
-                } else {
-                    return QrCode::format('png')
-                        ->size($size)
-                        ->margin($margin)
-                        ->generate($url);
+            $qrData = Cache::remember($cacheKey, 3600, function () use ($url, $size, $format, $margin) {
+                $builder = Builder::create()
+                    ->writer($format === 'svg' ? new SvgWriter() : new PngWriter())
+                    ->writerOptions([])
+                    ->data($url)
+                    ->encoding(new Encoding('UTF-8'))
+                    ->errorCorrectionLevel(ErrorCorrectionLevel::High)
+                    ->size($size)
+                    ->margin($margin)
+                    ->roundBlockSizeMode(RoundBlockSizeMode::Margin);
+
+                if ($format === 'png') {
+                    $logoPath = public_path('images/logo.png');
+                    if (file_exists($logoPath)) {
+                        // Create a bordered version of the logo
+                        $borderedLogoPath = $this->getBorderedLogoPath($logoPath);
+                        
+                        $builder->logoPath($borderedLogoPath)
+                                ->logoResizeToWidth((int)($size * 0.3))
+                                ->logoPunchoutBackground(true);
+                    }
                 }
+
+                $result = $builder->build();
+                return [
+                    'content' => $result->getString(),
+                    'mime' => $result->getMimeType()
+                ];
             });
 
-            $contentType = $format === 'svg' ? 'image/svg+xml' : 'image/png';
-
-            return response($qrCode)
-                ->header('Content-Type', $contentType)
+            return response($qrData['content'])
+                ->header('Content-Type', $qrData['mime'])
                 ->header('Cache-Control', 'public, max-age=3600')
                 ->header('Content-Disposition', 'inline; filename="qrcode.' . $format . '"');
 
@@ -79,51 +103,103 @@ class QRCodeController extends Controller
     public function fixedAsset(FixedAsset $fixedAsset, Request $request)
     {
         try {
-            // Validate input parameters
             $request->validate([
                 'size' => 'nullable|integer|min:100|max:500',
                 'format' => 'nullable|in:png,svg',
                 'margin' => 'nullable|integer|min:0|max:10'
             ]);
 
-            $size = $request->input('size', 200);
+            $size = (int) $request->input('size', 200);
             $format = $request->input('format', 'png');
-            $margin = $request->input('margin', 2);
+            $margin = (int) $request->input('margin', 2);
 
-            // Generate the URL for the asset (public route for QR scanning)
             $url = route('asset.public.show', $fixedAsset);
             
-            // Generate QR code
-            $qrCode = QrCode::format($format)
+            $builder = Builder::create()
+                ->writer($format === 'svg' ? new SvgWriter() : new PngWriter())
+                ->writerOptions([])
+                ->data($url)
+                ->encoding(new Encoding('UTF-8'))
+                ->errorCorrectionLevel(ErrorCorrectionLevel::High)
                 ->size($size)
                 ->margin($margin)
-                ->errorCorrection('M')
-                ->generate($url);
+                ->roundBlockSizeMode(RoundBlockSizeMode::Margin);
 
-            $contentType = $format === 'svg' ? 'image/svg+xml' : 'image/png';
-            
-            // Sanitize filename
+            if ($format === 'png') {
+                $logoPath = public_path('images/logo.png');
+                if (file_exists($logoPath)) {
+                    // Create a bordered version of the logo
+                    $borderedLogoPath = $this->getBorderedLogoPath($logoPath);
+
+                    $builder->logoPath($borderedLogoPath)
+                            ->logoResizeToWidth((int)($size * 0.3))
+                            ->logoPunchoutBackground(true);
+                }
+            }
+
+            $qrCodeResult = $builder->build();
+
             $safeKode = preg_replace('/[^a-zA-Z0-9_-]/', '_', $fixedAsset->kode);
             $filename = 'asset_' . $safeKode . '_qrcode.' . $format;
 
-            return response()->make($qrCode, 200, [
-                'Content-Type' => $contentType,
-                'Cache-Control' => 'public, max-age=3600',
-                'Content-Disposition' => 'inline; filename="' . $filename . '"'
-            ]);
+            return response($qrCodeResult->getString())
+                ->header('Content-Type', $qrCodeResult->getMimeType())
+                ->header('Cache-Control', 'public, max-age=3600')
+                ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
 
         } catch (\Exception $e) {
             Log::error('Fixed Asset QR Code generation failed', [
                 'asset_id' => $fixedAsset->id ?? 'unknown',
-                'asset_code' => $fixedAsset->kode ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            // Return a simple error response for debugging
             return response('QR Code generation failed: ' . $e->getMessage(), 500)
                 ->header('Content-Type', 'text/plain');
         }
+    }
+
+    /**
+     * Helper to create a temporary logo with white border
+     */
+    private function getBorderedLogoPath($originalPath)
+    {
+        $hash = md5_file($originalPath);
+        $filename = 'logo_bordered_' . $hash . '.png';
+        // Use standard temp directory to avoid permission issues in storage/app
+        $tempDir = sys_get_temp_dir(); 
+        $tempPath = $tempDir . DIRECTORY_SEPARATOR . $filename;
+
+        if (!file_exists($tempPath)) {
+            $source = imagecreatefromstring(file_get_contents($originalPath));
+            if (!$source) return $originalPath; // Fallback
+
+            $w = imagesx($source);
+            $h = imagesy($source);
+            
+            // Add 15% padding on each side
+            $padding = (int)($w * 0.15); 
+            $newW = $w + ($padding * 2);
+            $newH = $h + ($padding * 2);
+            
+            $dest = imagecreatetruecolor($newW, $newH);
+            
+            // Fill with white
+            $white = imagecolorallocate($dest, 255, 255, 255);
+            imagefill($dest, 0, 0, $white);
+            
+            // Copy original logo to center
+            // This handles transparency by blending it onto the white background
+            imagealphablending($dest, true);
+            imagecopy($dest, $source, $padding, $padding, 0, 0, $w, $h);
+            
+            imagepng($dest, $tempPath);
+            
+            imagedestroy($source);
+            imagedestroy($dest);
+        }
+        
+        return $tempPath;
     }
 
     /**
@@ -173,19 +249,29 @@ class QRCodeController extends Controller
             
             $qrSizePx = $qrSizes[$printFormat->code] ?? 295;
             
-            // Generate QR code SVG
-            $qrCodeSvgRaw = QrCode::format('svg')
+            // Generate QR code PNG with Logo using Endroid
+            $builder = Builder::create()
+                ->writer(new PngWriter())
+                ->writerOptions([])
+                ->data($url)
+                ->encoding(new Encoding('UTF-8'))
+                ->errorCorrectionLevel(ErrorCorrectionLevel::High)
                 ->size($qrSizePx)
-                ->margin(0)
-                ->errorCorrection('M')
-                ->generate($url);
+                ->margin(0) // No margin for print, handled by CSS
+                ->roundBlockSizeMode(RoundBlockSizeMode::Margin);
 
-            // PATCH SVG dengan helper
-            $qrCodeSvg = \App\Helpers\SvgHelper::fixSvgSize(
-                $qrCodeSvgRaw, 
-                $qrSizePx, 
-                300
-            );
+            $logoPath = public_path('images/logo.png');
+            if (file_exists($logoPath)) {
+                // Create a bordered version of the logo
+                $borderedLogoPath = $this->getBorderedLogoPath($logoPath);
+
+                $builder->logoPath($borderedLogoPath)
+                        ->logoResizeToWidth((int)($qrSizePx * 0.3))
+                        ->logoPunchoutBackground(true);
+            }
+
+            $result = $builder->build();
+            $qrCodeImage = $result->getDataUri();
 
             // Determine which template to use based on format code
             $templates = [
@@ -199,7 +285,7 @@ class QRCodeController extends Controller
 
             $html = view($template, [
                 'fixedAsset' => $fixedAsset,
-                'qrCodeSvg' => $qrCodeSvg,
+                'qrCodeImage' => $qrCodeImage, // Pass Data URI instead of SVG
                 'printFormat' => $printFormat,
                 'url' => $url,
                 'generatedAt' => now()->format('d/m/Y H:i')
@@ -236,40 +322,50 @@ class QRCodeController extends Controller
             'format' => 'nullable|in:png,svg'
         ]);
 
-        $size = $request->input('size', 400);
-        $format = $request->input('format', 'svg'); // Default to SVG (no imagick needed)
+        $size = (int) $request->input('size', 400);
+        $format = $request->input('format', 'svg');
 
         try {
             $url = route('asset.public.show', $fixedAsset);
             
-            // Always use SVG format as it doesn't require imagick extension
-            // SVG is also better quality and smaller file size
-            $qrCode = QrCode::format('svg')
+            $builder = Builder::create()
+                ->writer($format === 'svg' ? new SvgWriter() : new PngWriter())
+                ->writerOptions([])
+                ->data($url)
+                ->encoding(new Encoding('UTF-8'))
+                ->errorCorrectionLevel(ErrorCorrectionLevel::High)
                 ->size($size)
                 ->margin(2)
-                ->errorCorrection('H')
-                ->generate($url);
+                ->roundBlockSizeMode(RoundBlockSizeMode::Margin);
+
+            if ($format === 'png') {
+                $logoPath = public_path('images/logo.png');
+                if (file_exists($logoPath)) {
+                    // Create a bordered version of the logo
+                    $borderedLogoPath = $this->getBorderedLogoPath($logoPath);
+
+                    $builder->logoPath($borderedLogoPath)
+                            ->logoResizeToWidth((int)($size * 0.3))
+                            ->logoPunchoutBackground(true);
+                }
+            }
+
+            $qrCodeResult = $builder->build();
             
-            $contentType = 'image/svg+xml';
-            $actualFormat = 'svg';
-
-            // Sanitize filename
             $safeKode = preg_replace('/[^a-zA-Z0-9_-]/', '_', $fixedAsset->kode);
-            $filename = 'qrcode_' . $safeKode . '_' . now()->format('Ymd_His') . '.' . $actualFormat;
+            $filename = 'qrcode_' . $safeKode . '_' . now()->format('Ymd_His') . '.' . $format;
 
-            return response()->make($qrCode, 200, [
-                'Content-Type' => $contentType,
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                'Content-Length' => strlen($qrCode),
-                'Cache-Control' => 'no-cache, no-store, must-revalidate',
-                'Pragma' => 'no-cache',
-                'Expires' => '0'
-            ]);
+            return response($qrCodeResult->getString())
+                ->header('Content-Type', $qrCodeResult->getMimeType())
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                ->header('Content-Length', strlen($qrCodeResult->getString()))
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
 
         } catch (\Exception $e) {
             Log::error('QR Code download failed', [
                 'asset_id' => $fixedAsset->id,
-                'asset_code' => $fixedAsset->kode ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

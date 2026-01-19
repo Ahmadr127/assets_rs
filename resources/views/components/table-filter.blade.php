@@ -1,7 +1,8 @@
 @props([
     'filters' => [],
     'searchPlaceholder' => 'Cari...',
-    'showDateRange' => true
+    'showDateRange' => true,
+    'yearOptions' => []
 ])
 
 <div class="bg-white p-4 border-b border-gray-200 shadow-sm">
@@ -26,6 +27,24 @@
             </div>
         </div>
 
+        <!-- Year Filter -->
+        @if(!empty($yearOptions))
+        <div class="lg:w-32">
+            <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
+            <select 
+                id="year" 
+                name="year" 
+                x-model="filters.year"
+                @change="applyFilters()"
+                class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            >
+                <option value="">Semua</option>
+                @foreach($yearOptions as $year)
+                    <option value="{{ $year }}">{{ $year }}</option>
+                @endforeach
+            </select>
+        </div>
+        @endif
 
         <!-- Date Range Filter -->
         @if($showDateRange)
@@ -104,6 +123,7 @@ document.addEventListener('alpine:init', () => {
             search: initialFilters.search || '',
             dateFrom: initialFilters.dateFrom || '',
             dateTo: initialFilters.dateTo || '',
+            year: initialFilters.year || '',
             ...initialFilters
         },
 
@@ -113,6 +133,7 @@ document.addEventListener('alpine:init', () => {
                 search: new URLSearchParams(window.location.search).get('search') || '',
                 dateFrom: new URLSearchParams(window.location.search).get('date_from') || '',
                 dateTo: new URLSearchParams(window.location.search).get('date_to') || '',
+                year: new URLSearchParams(window.location.search).get('year') || '',
                 ...initialFilters
             };
         },
@@ -123,6 +144,7 @@ document.addEventListener('alpine:init', () => {
             if (this.filters.search) params.set('search', this.filters.search);
             if (this.filters.dateFrom) params.set('date_from', this.filters.dateFrom);
             if (this.filters.dateTo) params.set('date_to', this.filters.dateTo);
+            if (this.filters.year) params.set('year', this.filters.year);
             
             // Preserve existing pagination
             const currentPage = new URLSearchParams(window.location.search).get('page');
@@ -137,6 +159,7 @@ document.addEventListener('alpine:init', () => {
                 search: '',
                 dateFrom: '',
                 dateTo: '',
+                year: '',
                 ...initialFilters
             };
             
@@ -168,7 +191,8 @@ document.addEventListener('alpine:init', () => {
             const labels = {
                 search: `Pencarian: "${value}"`,
                 dateFrom: `Dari: ${this.formatDate(value)}`,
-                dateTo: `Sampai: ${this.formatDate(value)}`
+                dateTo: `Sampai: ${this.formatDate(value)}`,
+                year: `Tahun: ${value}`
             };
             return labels[key] || `${key}: ${value}`;
         },
