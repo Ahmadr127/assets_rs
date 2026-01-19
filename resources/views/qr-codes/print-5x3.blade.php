@@ -6,7 +6,7 @@
     <title>QR Code - {{ $fixedAsset->nama_fixed_asset }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif; background: white; }
+        body { font-family: sans-serif; background: white; }
         
         /* Screen preview */
         .container { max-width: 400px; margin: 20px auto; padding: 10px; }
@@ -22,7 +22,7 @@
         .logo-section { text-align: center; margin-bottom: 3px; max-height: 20px; overflow: hidden; }
         .logo-section img { max-width: 100%; max-height: 20px; }
         .nama-barang { font-size: 9px; font-weight: bold; text-align: center; line-height: 1.2; word-wrap: break-word; flex: 1; display: flex; align-items: center; justify-content: center; }
-        .kode-manual { font-size: 7px; font-weight: bold; text-align: center; padding: 2px; border: 1px solid #000; font-family: 'Consolas', 'Courier New', monospace; }
+        .kode-manual { font-size: 7px; font-weight: bold; text-align: center; padding: 2px; border: 1px solid #000; font-family: monospace; }
         
         /* PRINT STYLES - 5x3 cm */
         @media print {
@@ -122,7 +122,7 @@
                 text-align: center;
                 padding: 0.4mm 0.5mm;
                 border: 1px solid #000;
-                font-family: 'Consolas', 'Courier New', monospace;
+                font-family: monospace;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;

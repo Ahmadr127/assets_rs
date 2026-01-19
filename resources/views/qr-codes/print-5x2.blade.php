@@ -7,7 +7,7 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif; background: white; }
+        body { font-family: sans-serif; background: white; }
 
         /* Screen Preview */
         .container { max-width: 400px; margin: 20px auto; padding: 10px; }
@@ -78,7 +78,7 @@
             text-align: center;
             padding: 1px;
             border: 1px solid #000;
-            font-family: 'Consolas', 'Courier New', monospace;
+            font-family: monospace;
         }
 
         /* PRINT VERSION 5×2 cm (50×20 mm) */
@@ -194,7 +194,7 @@
                 text-align: center;
                 padding: 0.3mm 0.5mm;
                 border: 1px solid #000;
-                font-family: 'Consolas', 'Courier New', monospace;
+                font-family: monospace;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
