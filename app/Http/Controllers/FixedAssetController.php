@@ -110,21 +110,21 @@ class FixedAssetController extends Controller
             $query->whereYear('efektif_mulai', $request->year);
         }
 
-        // Dynamic Sorting
+        // Dynamic Sorting with secondary sort by ID for stable pagination
         $sort = $request->input('sort', 'newest');
         switch ($sort) {
             case 'oldest':
-                $query->orderBy('created_at', 'asc');
+                $query->orderBy('created_at', 'asc')->orderBy('id', 'asc');
                 break;
             case 'a-z':
-                $query->orderBy('nama_fixed_asset', 'asc');
+                $query->orderBy('nama_fixed_asset', 'asc')->orderBy('id', 'asc');
                 break;
             case 'z-a':
-                $query->orderBy('nama_fixed_asset', 'desc');
+                $query->orderBy('nama_fixed_asset', 'desc')->orderBy('id', 'desc');
                 break;
             case 'newest':
             default:
-                $query->orderBy('created_at', 'desc');
+                $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
                 break;
         }
 

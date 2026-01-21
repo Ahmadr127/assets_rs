@@ -147,7 +147,7 @@
                 </div>
                 
                 <div class="asset-info">
-                    <div class="company-name">PT. Arthasabena Putra</div>
+                    <div class="company-name">PT.Arthasabena Putra</div>
                     <div class="nama-barang">
                         {{ $fixedAsset->nama_fixed_asset }}
                     </div>
