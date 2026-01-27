@@ -2,12 +2,16 @@
     'name',
     'label' => 'Pilih...',
     'options' => [],
-    'value' => ''
+    'value' => '',
+    'fetchUrl' => null
 ])
 
 @php
     $selectedValue = old($name, $value ?? request($name));
-    $selectedLabel = $selectedValue && isset($options[$selectedValue]) ? $options[$selectedValue] : null;
+    // If options are empty (async), we might not find the label. 
+    // If value is present but not in options, we use the value itself as label (common for text filters) or placeholder.
+    // However, for async, we usually pass the selected option in 'options' prop to ensure it renders correctly initially.
+    $selectedLabel = $selectedValue && isset($options[$selectedValue]) ? $options[$selectedValue] : ($selectedValue ?: null);
 @endphp
 
 <div 
@@ -15,7 +19,8 @@
         name: '{{ $name }}',
         options: {{ Js::from($options) }},
         initialValue: '{{ $selectedValue }}',
-        placeholder: '{{ $label }}'
+        placeholder: '{{ $label }}',
+        fetchUrl: '{{ $fetchUrl }}'
     })"
     x-init="init()"
     class="relative"
@@ -79,8 +84,13 @@
             </div>
         </div>
 
+        <!-- Loading State -->
+        <div x-show="loading" class="px-3 py-2 text-xs text-gray-500 text-center">
+            <i class="fas fa-spinner fa-spin mr-1"></i> Memuat...
+        </div>
+
         <!-- Options List -->
-        <ul class="py-1 max-h-48 overflow-auto">
+        <ul x-show="!loading" class="py-1 max-h-48 overflow-auto">
             <!-- Default/All Option -->
             <li>
                 <button 
@@ -137,6 +147,9 @@
             searchQuery: '',
             open: false,
             placeholder: config.placeholder,
+            fetchUrl: config.fetchUrl,
+            loading: false,
+            loaded: false,
 
             init() {
                 // Convert options object to array format
@@ -145,6 +158,11 @@
                     label: label
                 }));
                 
+                // If options are provided initially, mark as loaded
+                if (this.options.length > 0) {
+                    this.loaded = true;
+                }
+
                 this.filteredOptions = this.options;
                 this.updateDisplayText();
                 
@@ -157,7 +175,8 @@
             updateDisplayText() {
                 if (this.selectedValue) {
                     const option = this.options.find(opt => opt.value == this.selectedValue);
-                    this.displayText = option ? option.label : this.placeholder;
+                    // If option found, use label. If not found (maybe async not loaded yet), use selectedValue as fallback
+                    this.displayText = option ? option.label : this.selectedValue;
                 } else {
                     this.displayText = this.placeholder;
                 }
@@ -178,11 +197,46 @@
             toggle() {
                 this.open = !this.open;
                 if (this.open) {
+                    // Fetch options if URL provided and not yet loaded
+                    if (this.fetchUrl && !this.loaded && !this.loading) {
+                        this.fetchOptions();
+                    }
+
                     this.searchQuery = '';
                     this.filterOptions();
                     this.$nextTick(() => {
                         this.$refs.searchInput?.focus();
                     });
+                }
+            },
+
+            async fetchOptions() {
+                this.loading = true;
+                try {
+                    const response = await fetch(this.fetchUrl);
+                    const data = await response.json();
+                    
+                    // Merge new options with existing (to keep the selected one if it was preloaded)
+                    // Or just replace if we assume API returns everything including selected.
+                    // Let's replace but ensure we handle the format.
+                    // API returns object {value: label}
+                    
+                    const newOptions = Object.entries(data).map(([value, label]) => ({
+                        value: String(value),
+                        label: label
+                    }));
+
+                    this.options = newOptions;
+                    this.filteredOptions = this.options;
+                    this.loaded = true;
+                    
+                    // Update display text in case the label for selected value is now available and different from value
+                    this.updateDisplayText();
+
+                } catch (error) {
+                    console.error('Error fetching options:', error);
+                } finally {
+                    this.loading = false;
                 }
             },
 

@@ -130,37 +130,49 @@ class FixedAssetController extends Controller
 
         $fixedAssets = $query->paginate(15)->withQueryString();
 
-        // Get unique values for nama and kode dropdowns
-        $namaOptions = FixedAsset::whereNotNull('nama_fixed_asset')
-            ->where('nama_fixed_asset', '!=', '')
-            ->distinct()
-            ->orderBy('nama_fixed_asset')
-            ->pluck('nama_fixed_asset', 'nama_fixed_asset');
-        
-        $kodeOptions = FixedAsset::whereNotNull('kode_manual')
-            ->where('kode_manual', '!=', '')
-            ->distinct()
-            ->orderBy('kode_manual')
-            ->pluck('kode_manual', 'kode_manual');
-        
-        $assetNumberOptions = FixedAsset::whereNotNull('asset_number')
-            ->where('asset_number', '!=', '')
-            ->distinct()
-            ->orderBy('asset_number')
-            ->pluck('asset_number', 'asset_number');
+        // Get unique values for nama and kode dropdowns - REMOVED for async loading
+        // $namaOptions = ...
+        // $kodeOptions = ...
+        // $assetNumberOptions = ...
 
-        // Get distinct years from efektif_mulai
-        $yearOptions = FixedAsset::whereNotNull('efektif_mulai')
-            ->selectRaw('EXTRACT(YEAR FROM efektif_mulai) as year')
-            ->distinct()
-            ->orderBy('year', 'desc')
-            ->pluck('year', 'year');
+        // Get distinct years from efektif_mulai - REMOVED for async
+        // $yearOptions = ...
 
-        // Master data for filters
-        $locations = Location::orderBy('name')->pluck('name','id');
-        $types = AssetType::orderBy('name')->pluck('name','id');
-        $statuses = AssetStatus::orderBy('name')->pluck('name','id');
-        $conditions = AssetCondition::orderBy('name')->pluck('name','id');
+        // Master data for filters - REMOVED for async
+        // $locations = ...
+        // $types = ...
+        // $statuses = ...
+        // $conditions = ...
+
+        // Prepare selected options for view (so label is shown correctly on load)
+        $selectedYear = [];
+        if ($request->filled('year')) {
+            $selectedYear[$request->year] = $request->year;
+        }
+
+        $selectedLocation = [];
+        if ($request->filled('location_id')) {
+            $loc = Location::find($request->location_id);
+            if ($loc) $selectedLocation[$loc->id] = $loc->name;
+        }
+
+        $selectedType = [];
+        if ($request->filled('asset_type_id')) {
+            $type = AssetType::find($request->asset_type_id);
+            if ($type) $selectedType[$type->id] = $type->name;
+        }
+
+        $selectedStatus = [];
+        if ($request->filled('status_id')) {
+            $status = AssetStatus::find($request->status_id);
+            if ($status) $selectedStatus[$status->id] = $status->name;
+        }
+
+        $selectedCondition = [];
+        if ($request->filled('condition_id')) {
+            $cond = AssetCondition::find($request->condition_id);
+            if ($cond) $selectedCondition[$cond->id] = $cond->name;
+        }
 
         $sortOptions = [
             'newest' => 'Terbaru',
@@ -171,16 +183,63 @@ class FixedAssetController extends Controller
 
         return view('fixed-assets.index', compact(
             'fixedAssets',
-            'namaOptions',
-            'kodeOptions',
-            'assetNumberOptions',
-            'yearOptions',
-            'locations',
-            'types',
-            'statuses',
-            'conditions',
+            'fixedAssets',
+            // 'namaOptions', // Removed
+            // 'kodeOptions', // Removed
+            // 'assetNumberOptions', // Removed
+            // 'assetNumberOptions', // Removed
+            'selectedYear',
+            'selectedLocation',
+            'selectedType',
+            'selectedStatus',
+            'selectedCondition',
             'sortOptions'
         ));
+    }
+
+    /**
+     * Get filter options asynchronously.
+     */
+    public function filterOptions(Request $request)
+    {
+        $field = $request->query('field');
+
+        switch ($field) {
+            case 'nama_fixed_asset':
+                return FixedAsset::whereNotNull('nama_fixed_asset')
+                    ->where('nama_fixed_asset', '!=', '')
+                    ->distinct()
+                    ->orderBy('nama_fixed_asset')
+                    ->pluck('nama_fixed_asset', 'nama_fixed_asset');
+            case 'kode':
+                return FixedAsset::whereNotNull('kode_manual')
+                    ->where('kode_manual', '!=', '')
+                    ->distinct()
+                    ->orderBy('kode_manual')
+                    ->pluck('kode_manual', 'kode_manual');
+            case 'asset_number':
+                return FixedAsset::whereNotNull('asset_number')
+                    ->where('asset_number', '!=', '')
+                    ->distinct()
+                    ->orderBy('asset_number')
+                    ->pluck('asset_number', 'asset_number');
+            case 'year':
+                return FixedAsset::whereNotNull('efektif_mulai')
+                    ->selectRaw('EXTRACT(YEAR FROM efektif_mulai) as year')
+                    ->distinct()
+                    ->orderBy('year', 'desc')
+                    ->pluck('year', 'year');
+            case 'location_id':
+                return Location::orderBy('name')->pluck('name', 'id');
+            case 'asset_type_id':
+                return AssetType::orderBy('name')->pluck('name', 'id');
+            case 'status_id':
+                return AssetStatus::orderBy('name')->pluck('name', 'id');
+            case 'condition_id':
+                return AssetCondition::orderBy('name')->pluck('name', 'id');
+            default:
+                return [];
+        }
     }
 
     /**

@@ -36,7 +36,8 @@
                 <x-filter-dropdown 
                     name="year" 
                     label="Semua Tahun" 
-                    :options="$yearOptions" 
+                    :fetch-url="route('fixed-assets.filter-options', ['field' => 'year'])"
+                    :options="$selectedYear" 
                     :value="request('year')" 
                 />
             </div>
@@ -45,7 +46,8 @@
                 <x-filter-dropdown 
                     name="nama_fixed_asset" 
                     label="Semua Nama Asset" 
-                    :options="$namaOptions" 
+                    :fetch-url="route('fixed-assets.filter-options', ['field' => 'nama_fixed_asset'])"
+                    :options="request('nama_fixed_asset') ? [request('nama_fixed_asset') => request('nama_fixed_asset')] : []"
                     :value="request('nama_fixed_asset')" 
                 />
             </div>
@@ -54,7 +56,8 @@
                 <x-filter-dropdown 
                     name="kode" 
                     label="Semua Kode" 
-                    :options="$kodeOptions" 
+                    :fetch-url="route('fixed-assets.filter-options', ['field' => 'kode'])"
+                    :options="request('kode') ? [request('kode') => request('kode')] : []"
                     :value="request('kode')" 
                 />
             </div>
@@ -63,7 +66,8 @@
                 <x-filter-dropdown 
                     name="location_id" 
                     label="Semua Lokasi" 
-                    :options="$locations" 
+                    :fetch-url="route('fixed-assets.filter-options', ['field' => 'location_id'])"
+                    :options="$selectedLocation" 
                     :value="request('location_id')" 
                 />
             </div>
@@ -74,7 +78,8 @@
                 <x-filter-dropdown 
                     name="asset_type_id" 
                     label="Semua Tipe" 
-                    :options="$types" 
+                    :fetch-url="route('fixed-assets.filter-options', ['field' => 'asset_type_id'])"
+                    :options="$selectedType" 
                     :value="request('asset_type_id')" 
                 />
             </div>
@@ -83,7 +88,8 @@
                 <x-filter-dropdown 
                     name="status_id" 
                     label="Semua Status" 
-                    :options="$statuses" 
+                    :fetch-url="route('fixed-assets.filter-options', ['field' => 'status_id'])"
+                    :options="$selectedStatus" 
                     :value="request('status_id')" 
                 />
             </div>
@@ -92,7 +98,8 @@
                 <x-filter-dropdown 
                     name="condition_id" 
                     label="Semua Kondisi" 
-                    :options="$conditions" 
+                    :fetch-url="route('fixed-assets.filter-options', ['field' => 'condition_id'])"
+                    :options="$selectedCondition" 
                     :value="request('condition_id')" 
                 />
             </div>
@@ -101,7 +108,8 @@
                 <x-filter-dropdown 
                     name="asset_number" 
                     label="Semua Asset Number" 
-                    :options="$assetNumberOptions" 
+                    :fetch-url="route('fixed-assets.filter-options', ['field' => 'asset_number'])"
+                    :options="request('asset_number') ? [request('asset_number') => request('asset_number')] : []"
                     :value="request('asset_number')" 
                 />
             </div>

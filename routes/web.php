@@ -63,6 +63,8 @@ Route::middleware('auth')->group(function () {
 
     // Fixed Assets Management routes
     Route::middleware('permission:manage_fixed_assets')->group(function () {
+        // Filter Options (Async)
+        Route::get('fixed-assets/filter-options', [FixedAssetController::class, 'filterOptions'])->name('fixed-assets.filter-options');
         Route::resource('fixed-assets', FixedAssetController::class);
 
         // Excel Import routes
