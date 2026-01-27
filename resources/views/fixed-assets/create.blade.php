@@ -57,6 +57,20 @@
                     @error('kode_manual')<p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
 
+                <!-- Asset Number -->
+                <div>
+                    <label for="asset_number" class="block text-xs font-medium text-gray-700 mb-1">
+                        Asset Number
+                    </label>
+                    <input type="text" 
+                           id="asset_number" 
+                           name="asset_number" 
+                           value="{{ old('asset_number') }}"
+                           class="block w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 @error('asset_number') border-red-300 @enderror"
+                           placeholder="Nomor aset">
+                    @error('asset_number')<p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
+
                 <!-- Nama Fixed Asset -->
                 <div>
                     <label for="nama_fixed_asset" class="block text-xs font-medium text-gray-700 mb-1">
@@ -102,6 +116,20 @@
                            class="block w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 @error('nilai_awal') border-red-300 @enderror"
                            placeholder="0">
                     @error('nilai_awal')<p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <!-- Purchase Order -->
+                <div>
+                    <label for="po" class="block text-xs font-medium text-gray-700 mb-1">
+                        Purchase Order
+                    </label>
+                    <input type="text" 
+                           id="po" 
+                           name="po" 
+                           value="{{ old('po') }}"
+                           class="block w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 @error('po') border-red-300 @enderror"
+                           placeholder="Nomor PO">
+                    @error('po')<p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
 
                 <!-- Efektif Mulai -->
